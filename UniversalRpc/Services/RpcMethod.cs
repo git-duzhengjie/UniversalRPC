@@ -1,0 +1,106 @@
+﻿using Newtonsoft.Json;
+using System.Net.Http.Json;
+
+namespace UniversalRpc.Rpc.Services
+{
+    /// <summary>
+    /// RpcMethod 的摘要说明
+    /// </summary>
+    public class RpcMethod
+    {
+        public static Dictionary<string, Dictionary<string, Type>> ReturnTypeMap =new Dictionary<string, Dictionary<string, Type>>();
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="objects">参数</param>
+        /// <param name="typeName">服务名</param>
+        /// <param name="methodName">方法名</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static object? SendMessageViaHttp(object[] objects, string typeName, string methodName, string url)
+        {
+            HttpClient httpClient = new ();
+            var req = new HttpRequestMessage(HttpMethod.Post, url)
+            {
+                Version = new Version(2, 0),
+                Content = JsonContent.Create(new Model.Request
+                {
+                    ServiceName = typeName,
+                    MethodName = methodName,
+                    Parameters = objects,
+                })
+            };
+            var response = httpClient.SendAsync(req).Result;
+            if (response.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                throw new Exception(response.ToString());
+            }
+            Type returnType = ReturnTypeMap[typeName][methodName];
+            var result = response.Content.ReadAsStringAsync().Result;
+            return DeserializeObject(result,returnType);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="objects">参数</param>
+        /// <param name="typeName">服务名</param>
+        /// <param name="methodName">方法名</param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentNullException"></exception>
+        public static void SendMessageViaHttpVoid(object[] objects, string typeName, string methodName, string url)
+        {
+            HttpClient httpClient = new();
+            var req = new HttpRequestMessage(HttpMethod.Post, url)
+            {
+                Version = new Version(2, 0),
+                Content = JsonContent.Create(new Model.Request
+                {
+                    ServiceName = typeName,
+                    MethodName = methodName,
+                    Parameters = objects,
+                })
+            };
+            var response = httpClient.SendAsync(req).Result;
+            if (response.StatusCode != System.Net.HttpStatusCode.OK)
+            {
+                throw new Exception(response.ToString());
+            }
+            return;
+        }
+
+        private static object? DeserializeObject(string str, Type returnType)
+        {
+            var retType = returnType;
+            bool isTask = false;
+            if (returnType.BaseType?.Name == "Task")
+            {
+                retType = returnType.GetGenericArguments().First();
+                isTask = true;
+            }
+            var type = typeof(JsonDeserializeObject<>).MakeGenericType(retType);
+            var method = type.GetMethod("DeserializeObject");
+            if (method == null)
+            {
+                return null;
+            }
+            var result = method.Invoke(null, new object[] { str });
+            if (isTask)
+            {
+                return Task.FromResult(result);
+            }
+            else
+            {
+                return result;
+            }
+        }
+    }
+    class JsonDeserializeObject<T>
+    {
+        public static T? DeserializeObject(string str)
+        {
+            return JsonConvert.DeserializeObject<T>(str, Rpc.JsonSerializerSettings);
+        }
+    }
+}
