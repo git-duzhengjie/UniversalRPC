@@ -6,7 +6,7 @@ namespace UniversalRpc.Rpc.Extensions
 {
     public static class ServicesExtensions
     {
-        public static void AddRpcService(this IServiceCollection services,JsonSerializerSettings jsonSerializerSettings)
+        public static void AddRpcService(this IServiceCollection services,JsonSerializerSettings? jsonSerializerSettings=null)
         {
             Rpc.JsonSerializerSettings = jsonSerializerSettings;
             services.AddSingleton<RpcServiceFactory>();
