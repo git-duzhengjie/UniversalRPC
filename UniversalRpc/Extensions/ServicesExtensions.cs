@@ -9,8 +9,8 @@ namespace UniversalRpc.RPC.Extensions
         public static void AddRPCService(this IServiceCollection services,JsonSerializerSettings? jsonSerializerSettings=null)
         {
             RPC.JsonSerializerSettings = jsonSerializerSettings;
-            services.AddSingleton<RpcServiceFactory>();
-            var serviceFactory=services.BuildServiceProvider().GetService<RpcServiceFactory>();
+            services.AddSingleton<RPCServiceFactory>();
+            var serviceFactory=services.BuildServiceProvider().GetService<RPCServiceFactory>();
             var types = serviceFactory?.GetRpcServiceTypes();
             if (types != null)
             {

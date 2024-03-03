@@ -32,11 +32,11 @@ namespace UniversalRpc.RPC.Services
                 .DefineType(type.FullName ?? throw new InvalidOperationException(), TypeAttributes.NotPublic);
             typeBuilder.AddInterfaceImplementation(typeof(T));
             MethodInfo[] methods = type.GetMethods();
-            lock (RpcMethod.ReturnTypeMap)
+            lock (RPCMethod.ReturnTypeMap)
             {
-                if (!RpcMethod.ReturnTypeMap.ContainsKey(type.FullName))
+                if (!RPCMethod.ReturnTypeMap.ContainsKey(type.FullName))
                 {
-                    RpcMethod.ReturnTypeMap.Add(type.FullName, new Dictionary<string, Type>());
+                    RPCMethod.ReturnTypeMap.Add(type.FullName, new Dictionary<string, Type>());
                 }
             }
 
@@ -45,13 +45,13 @@ namespace UniversalRpc.RPC.Services
                 ParameterInfo[] parameter = m.GetParameters();
                 Type[] array = parameter.Select(p => p.ParameterType).ToArray();
                 bool isVoid = m.ReturnType == typeof(void);
-                lock (RpcMethod.ReturnTypeMap)
+                lock (RPCMethod.ReturnTypeMap)
                 {
-                    if (!RpcMethod.ReturnTypeMap[type.FullName].ContainsKey(m.Name))
+                    if (!RPCMethod.ReturnTypeMap[type.FullName].ContainsKey(m.Name))
                     {
                         var returnType = m.ReturnType;
 
-                        RpcMethod.ReturnTypeMap[type.FullName].Add(m.Name, returnType);
+                        RPCMethod.ReturnTypeMap[type.FullName].Add(m.Name, returnType);
                     }
                 }
 
@@ -82,7 +82,7 @@ namespace UniversalRpc.RPC.Services
                 il.Emit(OpCodes.Ldstr, type.FullName);
                 il.Emit(OpCodes.Ldstr, m.Name);
                 il.Emit(OpCodes.Ldstr, url);
-                var method = typeof(RpcMethod).GetMethod(isVoid? "SendMessageViaHttpVoid": "SendMessageViaHttp",
+                var method = typeof(RPCMethod).GetMethod(isVoid? "SendMessageViaHttpVoid": "SendMessageViaHttp",
                                           new Type[] { typeof(object[]), typeof(string), typeof(string), typeof(string) });
                 il.Emit(OpCodes.Call, method
                                       ?? throw new InvalidOperationException());

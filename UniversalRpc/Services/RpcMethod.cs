@@ -6,7 +6,7 @@ namespace UniversalRpc.RPC.Services
     /// <summary>
     /// RpcMethod 的摘要说明
     /// </summary>
-    public class RpcMethod
+    public class RPCMethod
     {
         public static Dictionary<string, Dictionary<string, Type>> ReturnTypeMap =new Dictionary<string, Dictionary<string, Type>>();
 

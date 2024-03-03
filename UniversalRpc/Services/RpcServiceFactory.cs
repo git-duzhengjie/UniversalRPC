@@ -1,16 +1,11 @@
 ﻿using UniversalRpc.RPC.Contracts;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace UniversalRpc.RPC.Services
 {
-    public class RpcServiceFactory
+    public class RPCServiceFactory
     {
         private Dictionary<string, Type> _rpcServiceMap = new Dictionary<string, Type>();
-        public RpcServiceFactory() {
+        public RPCServiceFactory() {
             var assemblies= AppDomain.CurrentDomain.GetAssemblies();
             foreach (var assembly in assemblies)
             {

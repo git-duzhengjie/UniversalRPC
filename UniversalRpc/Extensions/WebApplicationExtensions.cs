@@ -22,7 +22,7 @@ namespace UniversalRpc.RPC.Extensions
             var request = await context.Request.ReadFromJsonAsync<Request>();
             if (request != null)
             {
-                var serviceFactory = app.Services.GetService<RpcServiceFactory>();
+                var serviceFactory = app.Services.GetService<RPCServiceFactory>();
                 var serviceType = serviceFactory?.GetServiceType(request?.ServiceName);
                 if (serviceType != null)
                 {
