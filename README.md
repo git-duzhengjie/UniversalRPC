@@ -5,14 +5,16 @@
 ## 1 使用说明
 ### 1.1 契约定义
 契约与普通接口定义一样，只需要继承IRPC接口
-### 1.2 服务端添加RPC服务
+### 1.2 服务端实现接口
+服务端引用定义的契约接口，并实现该接口
+### 1.3 服务端添加RPC服务
 - IServiceCollection 执行AddRPCService()扩展方法
 - WebApplication 执行UseRPCService()扩展方法
-### 1.3 添加RPC客户端
-#### 1.3.1 服务端添加
+### 1.4 添加RPC客户端
+#### 1.4.1 服务端添加
 - IServiceCollection 执行AddRPCClient(url)方法
 - 注入契约即可使用
-#### 1.3.2 客户端添加
+#### 1.4.2 客户端添加
 - new RPCClient<契约>()
 - RPCClient中的Value即当前契约
 ## 2 序列化
