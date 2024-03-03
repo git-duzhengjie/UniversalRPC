@@ -8,7 +8,7 @@ namespace UniversalRpc.RPC.Services
     /// 
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class RpcClient<T> where T : class
+    public class RPCClient<T> where T : class
     {
         /// <summary>
         /// 注入的rpc对象
@@ -19,7 +19,7 @@ namespace UniversalRpc.RPC.Services
         /// 
         /// </summary>
         /// <param name="httpContextAccessor"></param>
-        public RpcClient(string url)
+        public RPCClient(string url)
         {
             Value = CreateType(url+"/rpc");
         }

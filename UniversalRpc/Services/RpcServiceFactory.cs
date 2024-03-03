@@ -16,10 +16,10 @@ namespace UniversalRpc.RPC.Services
             {
                 foreach (var type in assembly.GetTypes())
                 {
-                    if (type.IsClass&& typeof(IRpc).IsAssignableFrom(type))
+                    if (type.IsClass&& typeof(IRPC).IsAssignableFrom(type))
                     {
                         var interfaces= type.GetInterfaces();
-                        var inheritInterface = interfaces.Where(x => x != typeof(IRpc) && x.GetInterfaces().Any(i=>i==typeof(IRpc))).FirstOrDefault();
+                        var inheritInterface = interfaces.Where(x => x != typeof(IRPC) && x.GetInterfaces().Any(i=>i==typeof(IRPC))).FirstOrDefault();
                         if (inheritInterface != null)
                         {
                             if (!_rpcServiceMap.ContainsKey(inheritInterface.FullName??""))
