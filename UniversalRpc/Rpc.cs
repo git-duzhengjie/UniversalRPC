@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace UniversalRpc.RPC
+namespace UniversalRPC.RPC
 {
     public class RPC
     {

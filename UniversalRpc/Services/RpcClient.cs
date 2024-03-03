@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace UniversalRpc.RPC.Services
+namespace UniversalRPC.RPC.Services
 {
     /// <summary>
     /// 
@@ -26,7 +26,7 @@ namespace UniversalRpc.RPC.Services
         private static T? CreateType(string url)
         {
             var type = typeof(T);
-            TypeBuilder typeBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("TestRpc"),
+            TypeBuilder typeBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("TestRPC"),
                     AssemblyBuilderAccess.Run)
                 .DefineDynamicModule(type.GetTypeInfo().Module.Name)
                 .DefineType(type.FullName ?? throw new InvalidOperationException(), TypeAttributes.NotPublic);

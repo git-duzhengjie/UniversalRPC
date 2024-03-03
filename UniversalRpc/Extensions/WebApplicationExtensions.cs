@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using UniversalRpc.RPC.Model;
+using UniversalRPC.RPC.Model;
 using Microsoft.Extensions.DependencyInjection;
-using UniversalRpc.RPC.Services;
+using UniversalRPC.RPC.Services;
 using Newtonsoft.Json;
 
-namespace UniversalRpc.RPC.Extensions
+namespace UniversalRPC.RPC.Extensions
 {
     public class Result<T>
     {
@@ -17,7 +17,7 @@ namespace UniversalRpc.RPC.Extensions
     }
     public static class WebApplicationExtensions
     {
-        private async static Task ToExcuteRpc(HttpContext context, WebApplication app)
+        private async static Task ToExcuteRPC(HttpContext context, WebApplication app)
         {
             var request = await context.Request.ReadFromJsonAsync<Request>();
             if (request != null)
@@ -65,10 +65,10 @@ namespace UniversalRpc.RPC.Extensions
         /// <typeparam name="T"></typeparam>
         /// <param name="app"></param>
         /// <returns></returns>
-        public static WebApplication UseRpcService(this WebApplication app)
+        public static WebApplication UseRPCService(this WebApplication app)
         {
-            _ = app.MapPost("/rpc", async (context)=>await ToExcuteRpc(context,app));
-            _ = app.MapGet("/rpc", async (context) => await ToExcuteRpc(context, app));
+            _ = app.MapPost("/rpc", async (context)=>await ToExcuteRPC(context,app));
+            _ = app.MapGet("/rpc", async (context) => await ToExcuteRPC(context, app));
             return app;
         }
 

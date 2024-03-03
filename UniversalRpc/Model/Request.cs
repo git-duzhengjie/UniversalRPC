@@ -1,4 +1,4 @@
-﻿namespace UniversalRpc.RPC.Model
+﻿namespace UniversalRPC.RPC.Model
 {
     public class Request
     {

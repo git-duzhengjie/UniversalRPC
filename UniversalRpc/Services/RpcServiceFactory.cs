@@ -1,6 +1,6 @@
-﻿using UniversalRpc.RPC.Contracts;
+﻿using UniversalRPC.RPC.Contracts;
 
-namespace UniversalRpc.RPC.Services
+namespace UniversalRPC.RPC.Services
 {
     public class RPCServiceFactory
     {
@@ -43,10 +43,10 @@ namespace UniversalRpc.RPC.Services
         }
 
         /// <summary>
-        /// 获取所有实现了IRpc接口的服务
+        /// 获取所有实现了IRPC接口的服务
         /// </summary>
         /// <returns></returns>
-        public Type[] GetRpcServiceTypes()
+        public Type[] GetRPCServiceTypes()
         {
             return _rpcServiceMap.Values.ToArray();
         }

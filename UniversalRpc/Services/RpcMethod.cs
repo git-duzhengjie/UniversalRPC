@@ -1,10 +1,10 @@
 ﻿using Newtonsoft.Json;
 using System.Net.Http.Json;
 
-namespace UniversalRpc.RPC.Services
+namespace UniversalRPC.RPC.Services
 {
     /// <summary>
-    /// RpcMethod 的摘要说明
+    /// RPCMethod 的摘要说明
     /// </summary>
     public class RPCMethod
     {

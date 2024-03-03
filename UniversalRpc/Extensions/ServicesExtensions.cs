@@ -1,8 +1,8 @@
-﻿using UniversalRpc.RPC.Services;
+﻿using UniversalRPC.RPC.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 
-namespace UniversalRpc.RPC.Extensions
+namespace UniversalRPC.RPC.Extensions
 {
     public static class ServicesExtensions
     {
@@ -11,7 +11,7 @@ namespace UniversalRpc.RPC.Extensions
             RPC.JsonSerializerSettings = jsonSerializerSettings;
             services.AddSingleton<RPCServiceFactory>();
             var serviceFactory=services.BuildServiceProvider().GetService<RPCServiceFactory>();
-            var types = serviceFactory?.GetRpcServiceTypes();
+            var types = serviceFactory?.GetRPCServiceTypes();
             if (types != null)
             {
                 foreach ( var type in types)
