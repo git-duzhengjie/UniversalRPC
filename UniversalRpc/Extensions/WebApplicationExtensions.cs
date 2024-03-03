@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using UniversalRpc.Rpc.Model;
+using UniversalRpc.RPC.Model;
 using Microsoft.Extensions.DependencyInjection;
-using UniversalRpc.Rpc.Services;
+using UniversalRpc.RPC.Services;
 using Newtonsoft.Json;
 
-namespace UniversalRpc.Rpc.Extensions
+namespace UniversalRpc.RPC.Extensions
 {
     public class Result<T>
     {
@@ -41,7 +41,7 @@ namespace UniversalRpc.Rpc.Extensions
                         context.Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
                         if (result != null)
                         {
-                            await context.Response.WriteAsync(JsonConvert.SerializeObject(result, Rpc.JsonSerializerSettings));
+                            await context.Response.WriteAsync(JsonConvert.SerializeObject(result, RPC.JsonSerializerSettings));
                         }
                     }
                     else

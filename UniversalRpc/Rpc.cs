@@ -1,8 +1,8 @@
 ﻿using Newtonsoft.Json;
 
-namespace UniversalRpc.Rpc
+namespace UniversalRpc.RPC
 {
-    public class Rpc
+    public class RPC
     {
         public static JsonSerializerSettings? JsonSerializerSettings {  get; set; }
     }

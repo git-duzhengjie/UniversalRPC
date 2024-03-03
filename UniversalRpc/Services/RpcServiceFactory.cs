@@ -1,11 +1,11 @@
-﻿using UniversalRpc.Rpc.Contracts;
+﻿using UniversalRpc.RPC.Contracts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UniversalRpc.Rpc.Services
+namespace UniversalRpc.RPC.Services
 {
     public class RpcServiceFactory
     {

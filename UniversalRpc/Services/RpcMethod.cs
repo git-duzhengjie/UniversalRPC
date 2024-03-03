@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Net.Http.Json;
 
-namespace UniversalRpc.Rpc.Services
+namespace UniversalRpc.RPC.Services
 {
     /// <summary>
     /// RpcMethod 的摘要说明
@@ -100,7 +100,7 @@ namespace UniversalRpc.Rpc.Services
     {
         public static T? DeserializeObject(string str)
         {
-            return JsonConvert.DeserializeObject<T>(str, Rpc.JsonSerializerSettings);
+            return JsonConvert.DeserializeObject<T>(str, RPC.JsonSerializerSettings);
         }
     }
 }

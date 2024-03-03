@@ -2,7 +2,7 @@
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace UniversalRpc.Rpc.Services
+namespace UniversalRpc.RPC.Services
 {
     /// <summary>
     /// 

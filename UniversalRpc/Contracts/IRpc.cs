@@ -1,4 +1,4 @@
-﻿namespace UniversalRpc.Rpc.Contracts
+﻿namespace UniversalRpc.RPC.Contracts
 {
     public interface IRpc
     {
