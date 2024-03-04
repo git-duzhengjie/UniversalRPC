@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace UniversalRPC.RPC.Services
@@ -12,7 +13,7 @@ namespace UniversalRPC.RPC.Services
     /// </summary>
     public class RPCMethod
     {
-        public static Dictionary<string, Dictionary<string, Type>> ReturnTypeMap =new Dictionary<string, Dictionary<string, Type>>();
+        public static Dictionary<string, Dictionary<string, Type>> ReturnTypeMap = new Dictionary<string, Dictionary<string, Type>>();
 
         /// <summary>
         /// 
@@ -25,15 +26,22 @@ namespace UniversalRPC.RPC.Services
         public static object SendMessageViaHttp(object[] objects, string typeName, string methodName, string url)
         {
             HttpClient httpClient = new HttpClient();
+            int version = 0;
+#if NET6_0_OR_GREATER
+version=2;
+#else
+            version = 1;
+#endif
+            var request = new Model.Request
+            {
+                ServiceName = typeName,
+                MethodName = methodName,
+                Parameters = objects,
+            };
             var req = new HttpRequestMessage(HttpMethod.Post, url)
             {
-                Version = new Version(2, 0),
-                Content = new StringContent(JsonConvert.SerializeObject(new Model.Request
-                {
-                    ServiceName = typeName,
-                    MethodName = methodName,
-                    Parameters = objects,
-                },RPC.JsonSerializerSettings))
+                Version = new Version(version, 0),
+                Content = new StringContent(JsonConvert.SerializeObject(request, RPC.JsonSerializerSettings), Encoding.UTF8, "application/json")
             };
             var response = httpClient.SendAsync(req).Result;
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
@@ -42,7 +50,7 @@ namespace UniversalRPC.RPC.Services
             }
             Type returnType = ReturnTypeMap[typeName][methodName];
             var result = response.Content.ReadAsStringAsync().Result;
-            return DeserializeObject(result,returnType);
+            return DeserializeObject(result, returnType);
         }
 
         /// <summary>
@@ -64,7 +72,7 @@ namespace UniversalRPC.RPC.Services
                     ServiceName = typeName,
                     MethodName = methodName,
                     Parameters = objects,
-                }, RPC.JsonSerializerSettings))
+                }, RPC.JsonSerializerSettings), Encoding.UTF8, "application/json")
             };
             var response = httpClient.SendAsync(req).Result;
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
