@@ -19,7 +19,10 @@ namespace UniversalRPC.RPC.Extensions
     {
         private async static Task ToExcuteRPC(HttpContext context, WebApplication app)
         {
-            var request = await context.Request.ReadFromJsonAsync<Request>();
+        var body=context.Request.Body;
+        var read = new StreamReader(body);
+        var request=JsonConvert.DeserializeObject<Request>(await read.ReadToEndAsync());
+            //var request = await context.Request.ReadFromJsonAsync<Request>();
             if (request != null)
             {
                 var serviceFactory = app.Services.GetService<RPCServiceFactory>();
