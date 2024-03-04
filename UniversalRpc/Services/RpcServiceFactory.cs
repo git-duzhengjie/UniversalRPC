@@ -1,7 +1,11 @@
-﻿using UniversalRPC.RPC.Contracts;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using UniversalRPC.RPC.Contracts;
 
 namespace UniversalRPC.RPC.Services
 {
+#if NET6_0_OR_GREATER
     public class RPCServiceFactory
     {
         private Dictionary<string, Type> _rpcServiceMap = new Dictionary<string, Type>();
@@ -51,4 +55,5 @@ namespace UniversalRPC.RPC.Services
             return _rpcServiceMap.Values.ToArray();
         }
     }
+#endif
 }

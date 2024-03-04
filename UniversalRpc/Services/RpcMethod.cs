@@ -1,5 +1,9 @@
 ﻿using Newtonsoft.Json;
-using System.Net.Http.Json;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace UniversalRPC.RPC.Services
 {
@@ -18,18 +22,18 @@ namespace UniversalRPC.RPC.Services
         /// <param name="methodName">方法名</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static object? SendMessageViaHttp(object[] objects, string typeName, string methodName, string url)
+        public static object SendMessageViaHttp(object[] objects, string typeName, string methodName, string url)
         {
-            HttpClient httpClient = new ();
+            HttpClient httpClient = new HttpClient();
             var req = new HttpRequestMessage(HttpMethod.Post, url)
             {
                 Version = new Version(2, 0),
-                Content = JsonContent.Create(new Model.Request
+                Content = new StringContent(JsonConvert.SerializeObject(new Model.Request
                 {
                     ServiceName = typeName,
                     MethodName = methodName,
                     Parameters = objects,
-                })
+                },RPC.JsonSerializerSettings))
             };
             var response = httpClient.SendAsync(req).Result;
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
@@ -51,16 +55,16 @@ namespace UniversalRPC.RPC.Services
         /// <exception cref="ArgumentNullException"></exception>
         public static void SendMessageViaHttpVoid(object[] objects, string typeName, string methodName, string url)
         {
-            HttpClient httpClient = new();
+            HttpClient httpClient = new HttpClient();
             var req = new HttpRequestMessage(HttpMethod.Post, url)
             {
                 Version = new Version(2, 0),
-                Content = JsonContent.Create(new Model.Request
+                Content = new StringContent(JsonConvert.SerializeObject(new Model.Request
                 {
                     ServiceName = typeName,
                     MethodName = methodName,
                     Parameters = objects,
-                })
+                }, RPC.JsonSerializerSettings))
             };
             var response = httpClient.SendAsync(req).Result;
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
@@ -70,7 +74,7 @@ namespace UniversalRPC.RPC.Services
             return;
         }
 
-        private static object? DeserializeObject(string str, Type returnType)
+        private static object DeserializeObject(string str, Type returnType)
         {
             var retType = returnType;
             bool isTask = false;
@@ -98,7 +102,7 @@ namespace UniversalRPC.RPC.Services
     }
     class JsonDeserializeObject<T>
     {
-        public static T? DeserializeObject(string str)
+        public static T DeserializeObject(string str)
         {
             return JsonConvert.DeserializeObject<T>(str, RPC.JsonSerializerSettings);
         }

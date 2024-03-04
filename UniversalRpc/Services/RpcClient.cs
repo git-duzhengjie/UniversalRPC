@@ -1,4 +1,7 @@
 ﻿
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -13,7 +16,7 @@ namespace UniversalRPC.RPC.Services
         /// <summary>
         /// 注入的rpc对象
         /// </summary>
-        public T? Value;
+        public T Value;
 
         /// <summary>
         /// 
@@ -23,10 +26,10 @@ namespace UniversalRPC.RPC.Services
         {
             Value = CreateType(url+"/rpc");
         }
-        private static T? CreateType(string url)
+        private static T CreateType(string url)
         {
             var type = typeof(T);
-            TypeBuilder typeBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("TestRPC"),
+            TypeBuilder typeBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("UniversalRPC"),
                     AssemblyBuilderAccess.Run)
                 .DefineDynamicModule(type.GetTypeInfo().Module.Name)
                 .DefineType(type.FullName ?? throw new InvalidOperationException(), TypeAttributes.NotPublic);

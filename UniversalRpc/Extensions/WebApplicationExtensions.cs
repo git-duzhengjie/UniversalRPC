@@ -1,12 +1,17 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿#if NET6_0_OR_GREATER
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using UniversalRPC.RPC.Model;
 using Microsoft.Extensions.DependencyInjection;
+#endif
+using UniversalRPC.RPC.Model;
+
 using UniversalRPC.RPC.Services;
 using Newtonsoft.Json;
+using System.Threading.Tasks;
 
 namespace UniversalRPC.RPC.Extensions
 {
+#if NET6_0_OR_GREATER
     public class Result<T>
     {
         public static T GetValue(object obj)
@@ -23,7 +28,7 @@ namespace UniversalRPC.RPC.Extensions
             if (request != null)
             {
                 var serviceFactory = app.Services.GetService<RPCServiceFactory>();
-                var serviceType = serviceFactory?.GetServiceType(request?.ServiceName);
+                var serviceType = serviceFactory.GetServiceType(request.ServiceName);
                 if (serviceType != null)
                 {
                     var service = app.Services.GetService(serviceType);
@@ -73,4 +78,5 @@ namespace UniversalRPC.RPC.Extensions
         }
 
     }
+#endif
 }

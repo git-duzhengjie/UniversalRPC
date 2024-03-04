@@ -1,11 +1,15 @@
 ﻿using UniversalRPC.RPC.Services;
+#if NET6_0_OR_GREATER
 using Microsoft.Extensions.DependencyInjection;
+#endif
 using Newtonsoft.Json;
 
 namespace UniversalRPC.RPC.Extensions
 {
+#if NET6_0_OR_GREATER
     public static class ServicesExtensions
     {
+
         public static void AddRPCService(this IServiceCollection services,JsonSerializerSettings? jsonSerializerSettings=null)
         {
             RPC.JsonSerializerSettings = jsonSerializerSettings;
@@ -31,4 +35,5 @@ namespace UniversalRPC.RPC.Extensions
             }
         }
     }
+#endif
 }
