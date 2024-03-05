@@ -120,10 +120,11 @@ namespace UniversalRPC.Extensions
         /// <typeparam name="T"></typeparam>
         /// <param name="app"></param>
         /// <returns></returns>
-        public static WebApplication UseURPCService(this WebApplication app)
+        public static WebApplication UseURPCService(this WebApplication app,string serviceName="")
         {
-            _ = app.MapPost("/URPC", async (context)=>await ToExcuteURPC(context,app));
-            _ = app.MapGet("/URPC", async (context) => await ToExcuteURPC(context, app));
+            var prefix=string.IsNullOrEmpty(serviceName)?"":$"/{serviceName}";
+            _ = app.MapPost($"{prefix}/URPC", async (context)=>await ToExcuteURPC(context,app));
+            _ = app.MapGet($"{prefix}/URPC", async (context) => await ToExcuteURPC(context, app));
             return app;
         }
 
@@ -133,10 +134,11 @@ namespace UniversalRPC.Extensions
         /// <typeparam name="T"></typeparam>
         /// <param name="app"></param>
         /// <returns></returns>
-        public static IEndpointRouteBuilder UseURPCService(this IEndpointRouteBuilder app)
+        public static IEndpointRouteBuilder UseURPCService(this IEndpointRouteBuilder app, string serviceName = "")
         {
-            _ = app.MapPost("/URPC", async (context) => await ToExcuteURPC(context, app));
-            _ = app.MapGet("/URPC", async (context) => await ToExcuteURPC(context, app));
+            var prefix = string.IsNullOrEmpty(serviceName) ? "" : $"/{serviceName}";
+            _ = app.MapPost($"{prefix}/URPC", async (context) => await ToExcuteURPC(context, app));
+            _ = app.MapGet($"{prefix}/URPC", async (context) => await ToExcuteURPC(context, app));
             return app;
         }
 

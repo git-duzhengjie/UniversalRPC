@@ -11,7 +11,7 @@ namespace UniversalRPC.Services
     /// <summary>
     /// URPCMethod 的摘要说明
     /// </summary>
-    internal class URPCMethod
+    public class URPCMethod
     {
         public static Dictionary<string, Dictionary<string, Type>> ReturnTypeMap = new Dictionary<string, Dictionary<string, Type>>();
 
