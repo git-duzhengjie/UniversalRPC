@@ -8,14 +8,14 @@
 ### 1.2 服务端实现接口
 服务端引用定义的契约接口，并实现该接口
 ### 1.3 服务端添加RPC服务
-- IServiceCollection 执行AddRPCService()扩展方法
-- WebApplication 执行UseRPCService()扩展方法
+- IServiceCollection 执行AddURPCService()扩展方法
+- WebApplication 执行UseURPCService()扩展方法
 ### 1.4 添加RPC客户端
 #### 1.4.1 服务端添加
 - IServiceCollection 执行AddRPCClient(url)方法
 - 注入契约即可使用
 #### 1.4.2 客户端添加
-- new RPCClient<契约>()
-- RPCClient中的Value即当前契约
+- new URPCClient<契约>()
+- URPCClient中的Value即当前契约
 ## 2 序列化
-UniversalRPC使用NewtonSofJson进行序列化操作，JsonSetting可以在AddRPCService和AddRPCClient方法中传入
+UniversalRPC使用NewtonSofJson进行序列化操作，JsonSetting可以在AddURPCService和AddRPCClient方法中传入
