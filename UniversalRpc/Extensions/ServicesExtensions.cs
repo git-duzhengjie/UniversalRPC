@@ -1,21 +1,21 @@
-﻿using UniversalRPC.RPC.Services;
+﻿using UniversalRPC.Services;
 #if NET6_0_OR_GREATER
 using Microsoft.Extensions.DependencyInjection;
 #endif
 using Newtonsoft.Json;
 
-namespace UniversalRPC.RPC.Extensions
+namespace UniversalRPC.Extensions
 {
 #if NET6_0_OR_GREATER
     public static class ServicesExtensions
     {
 
-        public static void AddRPCService(this IServiceCollection services,JsonSerializerSettings? jsonSerializerSettings=null)
+        public static void AddURPCService(this IServiceCollection services,JsonSerializerSettings? jsonSerializerSettings=null)
         {
-            RPC.JsonSerializerSettings = jsonSerializerSettings;
-            services.AddSingleton<RPCServiceFactory>();
-            var serviceFactory=services.BuildServiceProvider().GetService<RPCServiceFactory>();
-            var types = serviceFactory?.GetRPCServiceTypes();
+            URPC.JsonSerializerSettings = jsonSerializerSettings;
+            services.AddSingleton<URPCServiceFactory>();
+            var serviceFactory=services.BuildServiceProvider().GetService<URPCServiceFactory>();
+            var types = serviceFactory?.GetURPCServiceTypes();
             if (types != null)
             {
                 foreach ( var type in types)
@@ -25,13 +25,13 @@ namespace UniversalRPC.RPC.Extensions
             }
         }
 
-        public static void AddRPCClient<T>(this IServiceCollection services,string url,JsonSerializerSettings? jsonSerializerSettings =null) where T : class 
+        public static void AddURPCClient<T>(this IServiceCollection services,string url,JsonSerializerSettings? jsonSerializerSettings =null) where T : class 
         {
-            RPC.JsonSerializerSettings=jsonSerializerSettings;
-            var rpcClient = new RPCClient<T>(url);
-            if (rpcClient.Value != null)
+            URPC.JsonSerializerSettings=jsonSerializerSettings;
+            var URPCClient = new URPCClient<T>(url);
+            if (URPCClient.Value != null)
             {
-                services.AddSingleton(rpcClient.Value);
+                services.AddSingleton(URPCClient.Value);
             }
         }
     }

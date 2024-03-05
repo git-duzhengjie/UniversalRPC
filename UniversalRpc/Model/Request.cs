@@ -1,5 +1,8 @@
-﻿namespace UniversalRPC.RPC.Model
+﻿using System;
+
+namespace UniversalRPC.Model
 {
+    [Serializable]
     public class Request
     {
         /// <summary>

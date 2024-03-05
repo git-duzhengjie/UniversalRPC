@@ -1,29 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using UniversalRPC.RPC.Contracts;
+using UniversalRPC.Contracts;
 
-namespace UniversalRPC.RPC.Services
+namespace UniversalRPC.Services
 {
 #if NET6_0_OR_GREATER
-    public class RPCServiceFactory
+    public class URPCServiceFactory
     {
-        private Dictionary<string, Type> _rpcServiceMap = new Dictionary<string, Type>();
-        public RPCServiceFactory() {
+        private Dictionary<string, Type> _URPCServiceMap = new Dictionary<string, Type>();
+        public URPCServiceFactory() {
             var assemblies= AppDomain.CurrentDomain.GetAssemblies();
             foreach (var assembly in assemblies)
             {
                 foreach (var type in assembly.GetTypes())
                 {
-                    if (type.IsClass&& typeof(IRPC).IsAssignableFrom(type))
+                    if (type.IsClass&& typeof(IURPC).IsAssignableFrom(type))
                     {
                         var interfaces= type.GetInterfaces();
-                        var inheritInterface = interfaces.Where(x => x != typeof(IRPC) && x.GetInterfaces().Any(i=>i==typeof(IRPC))).FirstOrDefault();
+                        var inheritInterface = interfaces.Where(x => x != typeof(IURPC) && x.GetInterfaces().Any(i=>i==typeof(IURPC))).FirstOrDefault();
                         if (inheritInterface != null)
                         {
-                            if (!_rpcServiceMap.ContainsKey(inheritInterface.FullName??""))
+                            if (!_URPCServiceMap.ContainsKey(inheritInterface.FullName??""))
                             {
-                                _rpcServiceMap.Add(inheritInterface.FullName??"", type);
+                                _URPCServiceMap.Add(inheritInterface.FullName??"", type);
                             }
                         }
                         
@@ -39,7 +39,7 @@ namespace UniversalRPC.RPC.Services
         /// <returns></returns>
         public Type? GetServiceType(string? serviceName)
         {
-            if(serviceName!=null&& _rpcServiceMap.TryGetValue(serviceName,out var type))
+            if(serviceName!=null&& _URPCServiceMap.TryGetValue(serviceName,out var type))
             {
                 return type;
             }
@@ -47,12 +47,12 @@ namespace UniversalRPC.RPC.Services
         }
 
         /// <summary>
-        /// 获取所有实现了IRPC接口的服务
+        /// 获取所有实现了IURPC接口的服务
         /// </summary>
         /// <returns></returns>
-        public Type[] GetRPCServiceTypes()
+        public Type[] GetURPCServiceTypes()
         {
-            return _rpcServiceMap.Values.ToArray();
+            return _URPCServiceMap.Values.ToArray();
         }
     }
 #endif

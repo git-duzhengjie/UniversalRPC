@@ -5,16 +5,16 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 
-namespace UniversalRPC.RPC.Services
+namespace UniversalRPC.Services
 {
     /// <summary>
     /// 
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class RPCClient<T> where T : class
+    public class URPCClient<T> where T : class
     {
         /// <summary>
-        /// 注入的rpc对象
+        /// 注入的URPC对象
         /// </summary>
         public T Value;
 
@@ -22,9 +22,9 @@ namespace UniversalRPC.RPC.Services
         /// 
         /// </summary>
         /// <param name="httpContextAccessor"></param>
-        public RPCClient(string url)
+        public URPCClient(string url)
         {
-            Value = CreateType(url+"/rpc");
+            Value = CreateType(url+"/URPC");
         }
         private static T CreateType(string url)
         {
@@ -35,11 +35,11 @@ namespace UniversalRPC.RPC.Services
                 .DefineType(type.FullName ?? throw new InvalidOperationException(), TypeAttributes.NotPublic);
             typeBuilder.AddInterfaceImplementation(typeof(T));
             MethodInfo[] methods = type.GetMethods();
-            lock (RPCMethod.ReturnTypeMap)
+            lock (URPCMethod.ReturnTypeMap)
             {
-                if (!RPCMethod.ReturnTypeMap.ContainsKey(type.FullName))
+                if (!URPCMethod.ReturnTypeMap.ContainsKey(type.FullName))
                 {
-                    RPCMethod.ReturnTypeMap.Add(type.FullName, new Dictionary<string, Type>());
+                    URPCMethod.ReturnTypeMap.Add(type.FullName, new Dictionary<string, Type>());
                 }
             }
 
@@ -48,13 +48,13 @@ namespace UniversalRPC.RPC.Services
                 ParameterInfo[] parameter = m.GetParameters();
                 Type[] array = parameter.Select(p => p.ParameterType).ToArray();
                 bool isVoid = m.ReturnType == typeof(void);
-                lock (RPCMethod.ReturnTypeMap)
+                lock (URPCMethod.ReturnTypeMap)
                 {
-                    if (!RPCMethod.ReturnTypeMap[type.FullName].ContainsKey(m.Name))
+                    if (!URPCMethod.ReturnTypeMap[type.FullName].ContainsKey(m.Name))
                     {
                         var returnType = m.ReturnType;
 
-                        RPCMethod.ReturnTypeMap[type.FullName].Add(m.Name, returnType);
+                        URPCMethod.ReturnTypeMap[type.FullName].Add(m.Name, returnType);
                     }
                 }
 
@@ -85,7 +85,7 @@ namespace UniversalRPC.RPC.Services
                 il.Emit(OpCodes.Ldstr, type.FullName);
                 il.Emit(OpCodes.Ldstr, m.Name);
                 il.Emit(OpCodes.Ldstr, url);
-                var method = typeof(RPCMethod).GetMethod(isVoid? "SendMessageViaHttpVoid": "SendMessageViaHttp",
+                var method = typeof(URPCMethod).GetMethod(isVoid? "SendMessageViaHttpVoid": "SendMessageViaHttp",
                                           new Type[] { typeof(object[]), typeof(string), typeof(string), typeof(string) });
                 il.Emit(OpCodes.Call, method
                                       ?? throw new InvalidOperationException());

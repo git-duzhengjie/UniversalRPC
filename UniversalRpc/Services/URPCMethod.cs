@@ -6,12 +6,12 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace UniversalRPC.RPC.Services
+namespace UniversalRPC.Services
 {
     /// <summary>
-    /// RPCMethod 的摘要说明
+    /// URPCMethod 的摘要说明
     /// </summary>
-    public class RPCMethod
+    internal class URPCMethod
     {
         public static Dictionary<string, Dictionary<string, Type>> ReturnTypeMap = new Dictionary<string, Dictionary<string, Type>>();
 
@@ -41,7 +41,7 @@ version=2;
             var req = new HttpRequestMessage(HttpMethod.Post, url)
             {
                 Version = new Version(version, 0),
-                Content = new StringContent(JsonConvert.SerializeObject(request, RPC.JsonSerializerSettings), Encoding.UTF8, "application/json")
+                Content = new StringContent(JsonConvert.SerializeObject(request, URPC.JsonSerializerSettings), Encoding.UTF8, "application/json")
             };
             var response = httpClient.SendAsync(req).Result;
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
@@ -72,7 +72,7 @@ version=2;
                     ServiceName = typeName,
                     MethodName = methodName,
                     Parameters = objects,
-                }, RPC.JsonSerializerSettings), Encoding.UTF8, "application/json")
+                }, URPC.JsonSerializerSettings), Encoding.UTF8, "application/json")
             };
             var response = httpClient.SendAsync(req).Result;
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
@@ -112,7 +112,7 @@ version=2;
     {
         public static T DeserializeObject(string str)
         {
-            return JsonConvert.DeserializeObject<T>(str, RPC.JsonSerializerSettings);
+            return JsonConvert.DeserializeObject<T>(str, URPC.JsonSerializerSettings);
         }
     }
 }

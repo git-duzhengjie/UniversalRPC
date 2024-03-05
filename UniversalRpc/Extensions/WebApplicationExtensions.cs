@@ -4,28 +4,27 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Routing;
 #endif
-using UniversalRPC.RPC.Model;
+using UniversalRPC.Model;
 using System.IO;
-using UniversalRPC.RPC.Services;
+using UniversalRPC.Services;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
 using UniversalRPC.Extensions;
 
 
-namespace UniversalRPC.RPC.Extensions
+namespace UniversalRPC.Extensions
 {
 #if NET6_0_OR_GREATER
     public static class WebApplicationExtensions
     {
-        private async static Task ToExcuteRPC(HttpContext context, WebApplication app)
+        private async static Task ToExcuteURPC(HttpContext context, WebApplication app)
         {
         var body=context.Request.Body;
         var read = new StreamReader(body);
         var request=JsonConvert.DeserializeObject<Request>(await read.ReadToEndAsync());
-            //var request = await context.Request.ReadFromJsonAsync<Request>();
             if (request != null)
             {
-                var serviceFactory = app.Services.GetService<RPCServiceFactory>();
+                var serviceFactory = app.Services.GetService<URPCServiceFactory>();
                 var serviceType = serviceFactory.GetServiceType(request.ServiceName);
                 if (serviceType != null)
                 {
@@ -46,7 +45,7 @@ namespace UniversalRPC.RPC.Extensions
                         context.Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
                         if (result != null)
                         {
-                            await context.Response.WriteAsync(JsonConvert.SerializeObject(result, RPC.JsonSerializerSettings));
+                            await context.Response.WriteAsync(JsonConvert.SerializeObject(result, URPC.JsonSerializerSettings));
                         }
                     }
                     else
@@ -67,15 +66,14 @@ namespace UniversalRPC.RPC.Extensions
             }
         }
 
-        private async static Task ToExcuteRPC(HttpContext context, IEndpointRouteBuilder app)
+        private async static Task ToExcuteURPC(HttpContext context, IEndpointRouteBuilder app)
         {
         var body=context.Request.Body;
         var read = new StreamReader(body);
         var request=JsonConvert.DeserializeObject<Request>(await read.ReadToEndAsync());
-            //var request = await context.Request.ReadFromJsonAsync<Request>();
             if (request != null)
             {
-                var serviceFactory = app.ServiceProvider.GetService<RPCServiceFactory>();
+                var serviceFactory = app.ServiceProvider.GetService<URPCServiceFactory>();
                 var serviceType = serviceFactory.GetServiceType(request.ServiceName);
                 if (serviceType != null)
                 {
@@ -96,7 +94,7 @@ namespace UniversalRPC.RPC.Extensions
                         context.Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
                         if (result != null)
                         {
-                            await context.Response.WriteAsync(JsonConvert.SerializeObject(result, RPC.JsonSerializerSettings));
+                            await context.Response.WriteAsync(JsonConvert.SerializeObject(result, URPC.JsonSerializerSettings));
                         }
                     }
                     else
@@ -122,10 +120,10 @@ namespace UniversalRPC.RPC.Extensions
         /// <typeparam name="T"></typeparam>
         /// <param name="app"></param>
         /// <returns></returns>
-        public static WebApplication UseRPCService(this WebApplication app)
+        public static WebApplication UseURPCService(this WebApplication app)
         {
-            _ = app.MapPost("/rpc", async (context)=>await ToExcuteRPC(context,app));
-            _ = app.MapGet("/rpc", async (context) => await ToExcuteRPC(context, app));
+            _ = app.MapPost("/URPC", async (context)=>await ToExcuteURPC(context,app));
+            _ = app.MapGet("/URPC", async (context) => await ToExcuteURPC(context, app));
             return app;
         }
 
@@ -135,10 +133,10 @@ namespace UniversalRPC.RPC.Extensions
         /// <typeparam name="T"></typeparam>
         /// <param name="app"></param>
         /// <returns></returns>
-        public static IEndpointRouteBuilder UseRPCService(this IEndpointRouteBuilder app)
+        public static IEndpointRouteBuilder UseURPCService(this IEndpointRouteBuilder app)
         {
-            _ = app.MapPost("/rpc", async (context) => await ToExcuteRPC(context, app));
-            _ = app.MapGet("/rpc", async (context) => await ToExcuteRPC(context, app));
+            _ = app.MapPost("/URPC", async (context) => await ToExcuteURPC(context, app));
+            _ = app.MapGet("/URPC", async (context) => await ToExcuteURPC(context, app));
             return app;
         }
 
