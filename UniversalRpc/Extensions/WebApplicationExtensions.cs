@@ -136,6 +136,7 @@ namespace UniversalRPC.Extensions
         /// <returns></returns>
         public static IEndpointRouteBuilder UseURPCService(this IEndpointRouteBuilder app, string serviceName = "")
         {
+            serviceName = serviceName.Replace("/", "");
             var prefix = string.IsNullOrEmpty(serviceName) ? "" : $"/{serviceName}";
             _ = app.MapPost($"{prefix}/URPC", async (context) => await ToExcuteURPC(context, app));
             _ = app.MapGet($"{prefix}/URPC", async (context) => await ToExcuteURPC(context, app));
