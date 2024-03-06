@@ -33,7 +33,7 @@ namespace UniversalRPC.Extensions
                 var service = scope.ServiceProvider.GetService(serviceType);
                     if (request?.MethodName != null)
                     {
-                        var method = serviceType.GetMethods().FirstOrDefault(x=>x.Name==request.MethodName&& x.GetParameters().Length==request.Parameters.Length);
+                        var method = serviceType.GetMethods().FirstOrDefault(x=>x.Name==request.MethodName&& x.GetParameters().Length==request.Parameters.Length&&Same(x.GetParameters(),request.Parameters));
                         var result = method?.Invoke(service, request.Parameters);
                          if (result != null && result.GetType().IsTask(out var retType))
                         {
@@ -67,6 +67,15 @@ namespace UniversalRPC.Extensions
             }
         }
 
+        private static bool Same(object[] objects1,object[] objects2){
+        for(var i=0;i<objects1.Length;i++){
+        if(objects1[i].GetType()!=objects2[i].GetType()){
+        return false;
+        }
+        }
+        return true;
+        }
+
         private async static Task ToExcuteURPC(HttpContext context, IEndpointRouteBuilder app)
         {
         var body=context.Request.Body;
@@ -82,7 +91,7 @@ namespace UniversalRPC.Extensions
                 var service = scope.ServiceProvider.GetService(serviceType);
                     if (request?.MethodName != null)
                     {
-                        var method = serviceType.GetMethods().FirstOrDefault(x=>x.Name==request.MethodName&& x.GetParameters().Length==request.Parameters.Length);
+                        var method = serviceType.GetMethods().FirstOrDefault(x=>x.Name==request.MethodName&& x.GetParameters().Length==request.Parameters.Length&&Same(x.GetParameters(),request.Parameters));
                         var result = method?.Invoke(service, request.Parameters);
                         if (result != null && result.GetType().IsTask(out var retType))
                         {
