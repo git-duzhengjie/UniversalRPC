@@ -20,41 +20,42 @@ namespace UniversalRPC.Extensions
     {
         private async static Task ToExcuteURPC(HttpContext context, WebApplication app)
         {
-        var body=context.Request.Body;
-        var read = new StreamReader(body);
-        var request=JsonConvert.DeserializeObject<Request>(await read.ReadToEndAsync());
+            var body = context.Request.Body;
+            var read = new StreamReader(body);
+            var request = JsonConvert.DeserializeObject<Request>(await read.ReadToEndAsync());
             if (request != null)
             {
                 var serviceFactory = app.Services.GetService<URPCServiceFactory>();
                 var serviceType = serviceFactory.GetServiceType(request.ServiceName);
                 if (serviceType != null)
                 {
-                using(var scope=app.Services.CreateScope()){
-                var service = scope.ServiceProvider.GetService(serviceType);
-                    if (request?.MethodName != null)
+                    using (var scope = app.Services.CreateScope())
                     {
-                        var method = serviceType.GetMethods().FirstOrDefault(x=>x.Name==request.MethodName&& x.GetParameters().Length==request.Parameters.Length&&Same(x.GetParameters(),request.Parameters));
-                        var result = method?.Invoke(service, request.Parameters);
-                         if (result != null && result.GetType().IsTask(out var retType))
+                        var service = scope.ServiceProvider.GetService(serviceType);
+                        if (request?.MethodName != null)
                         {
-                             var task=(Task)result;
-                        await task.ConfigureAwait(false);
-                        var resultProperty = task.GetType().GetProperty("Result");
-                            result = resultProperty.GetValue(task);
-                        }
+                            var method = serviceType.GetMethods().FirstOrDefault(x => x.Name == request.MethodName && x.GetParameters().Length == request.Parameters.Length && Same(x.GetParameters().Select(x=>x.ParameterType).ToArray(), request.Parameters));
+                            var result = method?.Invoke(service, request.Parameters);
+                            if (result != null && result.GetType().IsTask(out var retType))
+                            {
+                                var task = (Task)result;
+                                await task.ConfigureAwait(false);
+                                var resultProperty = task.GetType().GetProperty("Result");
+                                result = resultProperty.GetValue(task);
+                            }
 
-                        context.Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
-                        if (result != null)
+                            context.Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
+                            if (result != null)
+                            {
+                                await context.Response.WriteAsync(JsonConvert.SerializeObject(result, URPC.JsonSerializerSettings));
+                            }
+                        }
+                        else
                         {
-                            await context.Response.WriteAsync(JsonConvert.SerializeObject(result, URPC.JsonSerializerSettings));
+                            context.Response.StatusCode = (int)System.Net.HttpStatusCode.BadRequest;
                         }
                     }
-                    else
-                    {
-                        context.Response.StatusCode = (int)System.Net.HttpStatusCode.BadRequest;
-                    }
-                }
-                    
+
                 }
                 else
                 {
@@ -67,52 +68,56 @@ namespace UniversalRPC.Extensions
             }
         }
 
-        private static bool Same(object[] objects1,object[] objects2){
-        for(var i=0;i<objects1.Length;i++){
-        if(objects1[i].GetType()!=objects2[i].GetType()){
-        return false;
-        }
-        }
-        return true;
+        private static bool Same(System.Type[] objects1, object[] objects2)
+        {
+            for (var i = 0; i < objects1.Length; i++)
+            {
+                if (objects1[i] != objects2[i].GetType())
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         private async static Task ToExcuteURPC(HttpContext context, IEndpointRouteBuilder app)
         {
-        var body=context.Request.Body;
-        var read = new StreamReader(body);
-        var request=JsonConvert.DeserializeObject<Request>(await read.ReadToEndAsync());
+            var body = context.Request.Body;
+            var read = new StreamReader(body);
+            var request = JsonConvert.DeserializeObject<Request>(await read.ReadToEndAsync(),URPC.JsonSerializerSettings);
             if (request != null)
             {
                 var serviceFactory = app.ServiceProvider.GetService<URPCServiceFactory>();
                 var serviceType = serviceFactory.GetServiceType(request.ServiceName);
                 if (serviceType != null)
                 {
-                using(var scope=app.ServiceProvider.CreateScope()){
-                var service = scope.ServiceProvider.GetService(serviceType);
-                    if (request?.MethodName != null)
+                    using (var scope = app.ServiceProvider.CreateScope())
                     {
-                        var method = serviceType.GetMethods().FirstOrDefault(x=>x.Name==request.MethodName&& x.GetParameters().Length==request.Parameters.Length&&Same(x.GetParameters(),request.Parameters));
-                        var result = method?.Invoke(service, request.Parameters);
-                        if (result != null && result.GetType().IsTask(out var retType))
+                        var service = scope.ServiceProvider.GetService(serviceType);
+                        if (request?.MethodName != null)
                         {
-                        var task=(Task)result;
-                        await task.ConfigureAwait(false);
-                        var resultProperty = task.GetType().GetProperty("Result");
-                            result = resultProperty.GetValue(task);
-                        }
+                            var method = serviceType.GetMethods().FirstOrDefault(x => x.Name == request.MethodName && x.GetParameters().Length == request.Parameters.Length && Same(x.GetParameters().Select(x=>x.ParameterType).ToArray(), request.Parameters));
+                            var result = method?.Invoke(service, request.Parameters);
+                            if (result != null && result.GetType().IsTask(out var retType))
+                            {
+                                var task = (Task)result;
+                                await task.ConfigureAwait(false);
+                                var resultProperty = task.GetType().GetProperty("Result");
+                                result = resultProperty.GetValue(task);
+                            }
 
-                        context.Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
-                        if (result != null)
+                            context.Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
+                            if (result != null)
+                            {
+                                await context.Response.WriteAsync(JsonConvert.SerializeObject(result, URPC.JsonSerializerSettings));
+                            }
+                        }
+                        else
                         {
-                            await context.Response.WriteAsync(JsonConvert.SerializeObject(result, URPC.JsonSerializerSettings));
+                            context.Response.StatusCode = (int)System.Net.HttpStatusCode.BadRequest;
                         }
                     }
-                    else
-                    {
-                        context.Response.StatusCode = (int)System.Net.HttpStatusCode.BadRequest;
-                    }
-                }
-                    
+
                 }
                 else
                 {
@@ -130,10 +135,10 @@ namespace UniversalRPC.Extensions
         /// <typeparam name="T"></typeparam>
         /// <param name="app"></param>
         /// <returns></returns>
-        public static WebApplication UseURPCService(this WebApplication app,string serviceName="")
+        public static WebApplication UseURPCService(this WebApplication app, string serviceName = "")
         {
-            var prefix=string.IsNullOrEmpty(serviceName)?"":$"/{serviceName}";
-            _ = app.MapPost($"{prefix}/URPC", async (context)=>await ToExcuteURPC(context,app));
+            var prefix = string.IsNullOrEmpty(serviceName) ? "" : $"/{serviceName}";
+            _ = app.MapPost($"{prefix}/URPC", async (context) => await ToExcuteURPC(context, app));
             _ = app.MapGet($"{prefix}/URPC", async (context) => await ToExcuteURPC(context, app));
             return app;
         }
