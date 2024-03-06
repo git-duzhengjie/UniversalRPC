@@ -33,7 +33,7 @@ namespace UniversalRPC.Extensions
                 var service = scope.ServiceProvider.GetService(serviceType);
                     if (request?.MethodName != null)
                     {
-                        var method = serviceType.GetMethods(request.MethodName).FirstOrDefault(x=>x.GetParameters().Length==request.Parameters.Length);
+                        var method = serviceType.GetMethods().FirstOrDefault(x=>x.Name==request.MethodName&& x.GetParameters().Length==request.Parameters.Length);
                         var result = method?.Invoke(service, request.Parameters);
                          if (result != null && result.GetType().IsTask(out var retType))
                         {
@@ -82,7 +82,7 @@ namespace UniversalRPC.Extensions
                 var service = scope.ServiceProvider.GetService(serviceType);
                     if (request?.MethodName != null)
                     {
-                        var method = serviceType.GetMethods(request.MethodName).FirstOrDefault(x=>x.GetParameters().Length==request.Parameters.Length);
+                        var method = serviceType.GetMethods().FirstOrDefault(x=>x.Name==request.MethodName&& x.GetParameters().Length==request.Parameters.Length);
                         var result = method?.Invoke(service, request.Parameters);
                         if (result != null && result.GetType().IsTask(out var retType))
                         {
