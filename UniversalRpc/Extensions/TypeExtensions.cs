@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace UniversalRPC.Extensions
 {
@@ -9,8 +10,13 @@ namespace UniversalRPC.Extensions
     {
         public static bool IsTask(this Type type,out Type ret)
         {
+            if (type == typeof(Task))
+            {
+                ret = null;
+                return true;
+            }
             if( type.BaseType.Name.StartsWith("Task")){
-                ret = type.GetGenericArguments().First();
+                ret = type.GetGenericArguments().FirstOrDefault();
                 return true;
             };
             ret = type;

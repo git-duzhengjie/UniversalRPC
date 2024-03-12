@@ -50,7 +50,8 @@ namespace UniversalRPC.Extensions
                         {
                             var method = serviceType.GetMethods().FirstOrDefault(x => x.Name == request.MethodName && x.GetParameters().Length == request.Parameters.Length && Same(x.GetParameters().Select(x=>x.ParameterType).ToArray(), request.Parameters));
                             var result = method?.Invoke(service, request.Parameters);
-                            if (result != null && result.GetType().IsTask(out var retType))
+                            Type retType=null;
+                            if (result != null && result.GetType().IsTask(out retType))
                             {
                                 var task = (Task)result;
                                 await task.ConfigureAwait(false);
@@ -59,7 +60,7 @@ namespace UniversalRPC.Extensions
                             }
 
                             context.Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
-                            if (result != null)
+                            if (result != null&&retType!=null&&retType.Name!="VoidTaskResult")
                             {
                                 await context.Response.WriteAsync(JsonConvert.SerializeObject(result, URPC.JsonSerializerSettings));
                             }

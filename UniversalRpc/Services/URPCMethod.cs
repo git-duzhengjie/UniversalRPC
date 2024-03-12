@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using UniversalRPC.Extensions;
 
 namespace UniversalRPC.Services
 {
@@ -49,6 +50,10 @@ version=2;
                 throw new Exception(response.ToString());
             }
             Type returnType = ReturnTypeMap[typeName][methodName];
+            if(returnType.IsTask(out var retType)&&retType==null||retType.Name== "VoidTaskResult")
+            {
+                return Task.CompletedTask;
+            }
             var result = response.Content.ReadAsStringAsync().Result;
             return DeserializeObject(result, returnType);
         }
