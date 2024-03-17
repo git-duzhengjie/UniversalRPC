@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -75,11 +76,11 @@ namespace UniversalRPC.Services
             httpClient = new HttpClient();
 #endif
             int version = 2;
-            //#if NET6_0_OR_GREATER
-            //version=2;
-            //#else
-            //            version = 1;
-            //#endif
+//#if NET6_0_OR_GREATER
+//version=2;
+//#else
+//            version = 1;
+//#endif
             var request = new Model.Request
             {
                 ServiceName = typeName,
