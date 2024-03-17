@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -25,13 +26,13 @@ namespace UniversalRPC.Services
         /// <exception cref="ArgumentNullException"></exception>
         public static object SendMessage(object[] objects, string typeName, string methodName, string url)
         {
-            HttpClient httpClient = new HttpClient();
-            int version = 0;
-#if NET6_0_OR_GREATER
-version=2;
-#else
-            version = 1;
-#endif
+            HttpClient httpClient = new HttpClient(new WinHttpHandler());
+            int version = 2;
+            //#if NET6_0_OR_GREATER
+            //version=2;
+            //#else
+            //            version = 1;
+            //#endif
             var request = new Model.Request
             {
                 ServiceName = typeName,
@@ -63,16 +64,23 @@ version=2;
         /// <exception cref="ArgumentNullException"></exception>
         public static void SendVoidMessage(object[] objects, string typeName, string methodName, string url)
         {
-            HttpClient httpClient = new HttpClient();
+            HttpClient httpClient = new HttpClient(new WinHttpHandler());
+            int version = 2;
+//#if NET6_0_OR_GREATER
+//version=2;
+//#else
+//            version = 1;
+//#endif
+            var request = new Model.Request
+            {
+                ServiceName = typeName,
+                MethodName = methodName,
+                Parameters = objects,
+            };
             var req = new HttpRequestMessage(HttpMethod.Post, url)
             {
-                Version = new Version(2, 0),
-                Content = new StringContent(JsonConvert.SerializeObject(new Model.Request
-                {
-                    ServiceName = typeName,
-                    MethodName = methodName,
-                    Parameters = objects,
-                }, URPC.JsonSerializerSettings), Encoding.UTF8, "application/json")
+                Version = new Version(version, 0),
+                Content = new StringContent(JsonConvert.SerializeObject(request, URPC.JsonSerializerSettings), Encoding.UTF8, "application/json")
             };
             var response = httpClient.SendAsync(req).Result;
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
