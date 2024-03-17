@@ -23,7 +23,7 @@ namespace UniversalRPC.Services
         /// <param name="methodName">方法名</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static object SendMessageViaHttp(object[] objects, string typeName, string methodName, string url)
+        public static object SendMessage(object[] objects, string typeName, string methodName, string url)
         {
             HttpClient httpClient = new HttpClient();
             int version = 0;
@@ -61,7 +61,7 @@ version=2;
         /// <param name="methodName">方法名</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static void SendMessageViaHttpVoid(object[] objects, string typeName, string methodName, string url)
+        public static void SendVoidMessage(object[] objects, string typeName, string methodName, string url)
         {
             HttpClient httpClient = new HttpClient();
             var req = new HttpRequestMessage(HttpMethod.Post, url)

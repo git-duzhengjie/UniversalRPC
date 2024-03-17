@@ -85,7 +85,7 @@ namespace UniversalRPC.Services
                 il.Emit(OpCodes.Ldstr, type.FullName);
                 il.Emit(OpCodes.Ldstr, m.Name);
                 il.Emit(OpCodes.Ldstr, url);
-                var method = typeof(URPCMethod).GetMethod(isVoid? "SendMessageViaHttpVoid": "SendMessageViaHttp",
+                var method = typeof(URPCMethod).GetMethod(isVoid? "SendVoidMessage" : "SendMessage",
                                           new Type[] { typeof(object[]), typeof(string), typeof(string), typeof(string) });
                 il.Emit(OpCodes.Call, method
                                       ?? throw new InvalidOperationException());
