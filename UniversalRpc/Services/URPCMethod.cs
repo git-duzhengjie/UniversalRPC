@@ -26,7 +26,12 @@ namespace UniversalRPC.Services
         /// <exception cref="ArgumentNullException"></exception>
         public static object SendMessage(object[] objects, string typeName, string methodName, string url)
         {
-            HttpClient httpClient = new HttpClient(new WinHttpHandler());
+            HttpClient httpClient;
+#if NET48
+            httpClient=new HttpClient(new WinHttpHandler());
+#else
+            httpClient = new HttpClient();
+#endif
             int version = 2;
             //#if NET6_0_OR_GREATER
             //version=2;
@@ -64,7 +69,12 @@ namespace UniversalRPC.Services
         /// <exception cref="ArgumentNullException"></exception>
         public static void SendVoidMessage(object[] objects, string typeName, string methodName, string url)
         {
-            HttpClient httpClient = new HttpClient(new WinHttpHandler());
+            HttpClient httpClient;
+#if NET48
+            httpClient=new HttpClient(new WinHttpHandler());
+#else
+            httpClient = new HttpClient();
+#endif
             int version = 2;
 //#if NET6_0_OR_GREATER
 //version=2;
