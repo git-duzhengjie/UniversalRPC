@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -27,11 +28,14 @@ namespace UniversalRPC.Services
         public static object SendMessage(object[] objects, string typeName, string methodName, string url)
         {
             HttpClient httpClient;
-#if NET48
-            httpClient=new HttpClient(new WinHttpHandler());
-#else
-            httpClient = new HttpClient();
-#endif
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                httpClient = new HttpClient(new WinHttpHandler());
+            }
+            else
+            {
+                httpClient = new HttpClient();
+            }
             int version = 2;
             //#if NET6_0_OR_GREATER
             //version=2;
@@ -70,11 +74,14 @@ namespace UniversalRPC.Services
         public static void SendVoidMessage(object[] objects, string typeName, string methodName, string url)
         {
             HttpClient httpClient;
-#if NET48
-            httpClient=new HttpClient(new WinHttpHandler());
-#else
-            httpClient = new HttpClient();
-#endif
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                httpClient = new HttpClient(new WinHttpHandler());
+            }
+            else
+            {
+                httpClient = new HttpClient();
+            }
             int version = 2;
 //#if NET6_0_OR_GREATER
 //version=2;
