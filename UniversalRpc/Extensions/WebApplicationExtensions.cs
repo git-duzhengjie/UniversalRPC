@@ -91,7 +91,6 @@ namespace UniversalRPC.Extensions
         {
             var prefix = string.IsNullOrEmpty(serviceName) ? "" : $"/{serviceName}";
             _ = app.MapPost($"{prefix}/URPC", async (context) => await ToExcuteURPC(context, app.Services));
-            _ = app.MapGet($"{prefix}/URPC", async (context) => await ToExcuteURPC(context, app.Services));
             return app;
         }
 
@@ -106,7 +105,6 @@ namespace UniversalRPC.Extensions
             serviceName = serviceName.Replace("/", "");
             var prefix = string.IsNullOrEmpty(serviceName) ? "" : $"/{serviceName}";
             _ = app.MapPost($"{prefix}/URPC", async (context) => await ToExcuteURPC(context, app.ServiceProvider));
-            _ = app.MapGet($"{prefix}/URPC", async (context) => await ToExcuteURPC(context, app.ServiceProvider));
             return app;
         }
 
