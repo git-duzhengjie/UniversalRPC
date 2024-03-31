@@ -12,7 +12,7 @@ namespace UniversalRPC.Extensions
 
         public static void AddURPCService(this IServiceCollection services,JsonSerializerSettings? jsonSerializerSettings=null)
         {
-            URPC.JsonSerializerSettings = jsonSerializerSettings;
+            URPC.JsonSerializerOptions = jsonSerializerSettings;
             services.AddSingleton<URPCServiceFactory>();
             var serviceFactory=services.BuildServiceProvider().GetService<URPCServiceFactory>();
             var types = serviceFactory?.GetURPCServiceTypes();
@@ -27,7 +27,7 @@ namespace UniversalRPC.Extensions
 
         public static void AddURPCClient<T>(this IServiceCollection services,string url,JsonSerializerSettings? jsonSerializerSettings =null) where T : class 
         {
-            URPC.JsonSerializerSettings=jsonSerializerSettings;
+            URPC.JsonSerializerOptions=jsonSerializerSettings;
             var URPCClient = new URPCClient<T>(url);
             if (URPCClient.Value != null)
             {

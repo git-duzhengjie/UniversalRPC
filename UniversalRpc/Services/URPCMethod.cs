@@ -1,11 +1,10 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace UniversalRPC.Services
@@ -51,7 +50,7 @@ namespace UniversalRPC.Services
             var req = new HttpRequestMessage(HttpMethod.Post, url)
             {
                 Version = new Version(version, 0),
-                Content = new StringContent(JsonConvert.SerializeObject(request, URPC.JsonSerializerSettings), Encoding.UTF8, "application/json")
+                Content = new StringContent(JsonSerializer.Serialize(request, URPC.JsonSerializerOptions), Encoding.UTF8, "application/json")
             };
             var response = httpClient.SendAsync(req).Result;
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
@@ -97,7 +96,7 @@ namespace UniversalRPC.Services
             var req = new HttpRequestMessage(HttpMethod.Post, url)
             {
                 Version = new Version(version, 0),
-                Content = new StringContent(JsonConvert.SerializeObject(request, URPC.JsonSerializerSettings), Encoding.UTF8, "application/json")
+                Content = new StringContent(JsonSerializer.Serialize(request, URPC.JsonSerializerOptions), Encoding.UTF8, "application/json")
             };
             var response = httpClient.SendAsync(req).Result;
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
@@ -137,7 +136,7 @@ namespace UniversalRPC.Services
     {
         public static T DeserializeObject(string str)
         {
-            return JsonConvert.DeserializeObject<T>(str, URPC.JsonSerializerSettings);
+            return JsonSerializer.Deserialize<T>(str, URPC.JsonSerializerOptions);
         }
     }
 }

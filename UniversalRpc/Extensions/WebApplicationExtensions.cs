@@ -7,11 +7,11 @@ using Microsoft.AspNetCore.Routing;
 using UniversalRPC.Model;
 using System.IO;
 using UniversalRPC.Services;
-using Newtonsoft.Json;
 using System.Threading.Tasks;
 using UniversalRPC.Extensions;
 using System.Linq;
 using System;
+using System.Text.Json;
 
 
 namespace UniversalRPC.Extensions
@@ -36,7 +36,7 @@ namespace UniversalRPC.Extensions
         {
             var body = context.Request.Body;
             var read = new StreamReader(body);
-            var request = JsonConvert.DeserializeObject<Request>(await read.ReadToEndAsync(),URPC.JsonSerializerSettings);
+            var request = JsonSerializer.Deserialize<Request>(await read.ReadToEndAsync(),URPC.JsonSerializerOptions);
             if (request != null)
             {
                 var serviceFactory = serviceProvider.GetService<URPCServiceFactory>();
@@ -61,7 +61,7 @@ namespace UniversalRPC.Extensions
                             context.Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
                             if (result != null)
                             {
-                                await context.Response.WriteAsync(JsonConvert.SerializeObject(result, URPC.JsonSerializerSettings));
+                                await context.Response.WriteAsync(JsonSerializer.Serialize(result, URPC.JsonSerializerOptions));
                             }
                         }
                         else
