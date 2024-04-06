@@ -11,7 +11,7 @@ namespace UniversalRPC.Extensions
     public static class ServicesExtensions
     {
 
-        public static void AddURPCService(this IServiceCollection services,ISerialize serialize)
+        public static void AddURPCService(this IServiceCollection services,ISerialize serialize=null)
         {
             URPC.Serialize=serialize;
             services.AddSingleton<URPCServiceFactory>();
