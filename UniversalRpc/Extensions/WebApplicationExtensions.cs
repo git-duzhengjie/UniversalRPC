@@ -36,7 +36,7 @@ namespace UniversalRPC.Extensions
         {
             var body = context.Request.Body;
             var read = new StreamReader(body);
-            var request = JsonSerializer.Deserialize<Request>(await read.ReadToEndAsync(),URPC.JsonSerializerOptions);
+            var request = URPC.Serialize.Deserialize<Request>(await read.ReadToEndAsync());
             if (request != null)
             {
                 var serviceFactory = serviceProvider.GetService<URPCServiceFactory>();
@@ -61,7 +61,7 @@ namespace UniversalRPC.Extensions
                             context.Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
                             if (result != null)
                             {
-                                await context.Response.WriteAsync(JsonSerializer.Serialize(result, URPC.JsonSerializerOptions));
+                                await context.Response.WriteAsync(URPC.Serialize.Serialize(result));
                             }
                         }
                         else

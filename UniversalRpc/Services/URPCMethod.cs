@@ -50,7 +50,7 @@ namespace UniversalRPC.Services
             var req = new HttpRequestMessage(HttpMethod.Post, url)
             {
                 Version = new Version(version, 0),
-                Content = new StringContent(JsonSerializer.Serialize(request, URPC.JsonSerializerOptions), Encoding.UTF8, "application/json")
+                Content = new StringContent(URPC.Serialize.Serialize(request), Encoding.UTF8, "application/json")
             };
             var response = httpClient.SendAsync(req).Result;
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
@@ -96,7 +96,7 @@ namespace UniversalRPC.Services
             var req = new HttpRequestMessage(HttpMethod.Post, url)
             {
                 Version = new Version(version, 0),
-                Content = new StringContent(JsonSerializer.Serialize(request, URPC.JsonSerializerOptions), Encoding.UTF8, "application/json")
+                Content = new StringContent(URPC.Serialize.Serialize(request), Encoding.UTF8, "application/json")
             };
             var response = httpClient.SendAsync(req).Result;
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
@@ -136,7 +136,7 @@ namespace UniversalRPC.Services
     {
         public static T DeserializeObject(string str)
         {
-            return JsonSerializer.Deserialize<T>(str, URPC.JsonSerializerOptions);
+            return URPC.Serialize.Deserialize<T>(str);
         }
     }
 }
