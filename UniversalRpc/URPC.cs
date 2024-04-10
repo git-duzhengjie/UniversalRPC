@@ -1,13 +1,14 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.Text.Json;
+using UniversalRPC.Serialization;
 using UniversalRPC.Services;
 
 namespace UniversalRPC
 {
     public class URPC
     {
-        public static JsonSerializerSettings JsonSerializerSettings {  get; set; }
+        public static ISerialize Serialize;
 
         private static readonly Dictionary<(Type,string),object> _URPCClientService=new Dictionary<(Type,string),object>();
 
@@ -26,6 +27,15 @@ namespace UniversalRPC
             var client = new URPCClient<T>(url);
             _URPCClientService.Add((typeof(T), url), client.Value);
             return client.Value;
+        }
+
+        /// <summary>
+        /// 获取序列化器
+        /// </summary>
+        /// <returns></returns>
+        public static ISerialize GetSerialize()
+        {
+            return Serialize??new DefaultSerialize();
         }
     }
 }

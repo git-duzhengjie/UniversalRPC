@@ -5,28 +5,30 @@ using UniversalRPC.Contracts;
 
 namespace UniversalRPC.Services
 {
-#if NET6_0_OR_GREATER
+
     public class URPCServiceFactory
     {
-        private Dictionary<string, Type> _URPCServiceMap = new Dictionary<string, Type>();
-        public URPCServiceFactory() {
-            var assemblies= AppDomain.CurrentDomain.GetAssemblies();
+#if NET6_0_OR_GREATER
+        private readonly Dictionary<string, Type> _URPCServiceMap = new();
+        public URPCServiceFactory()
+        {
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             foreach (var assembly in assemblies)
             {
                 foreach (var type in assembly.GetTypes())
                 {
-                    if (type.IsClass&& typeof(IURPC).IsAssignableFrom(type))
+                    if (type.IsClass && typeof(IURPC).IsAssignableFrom(type))
                     {
-                        var interfaces= type.GetInterfaces();
-                        var inheritInterface = interfaces.Where(x => x != typeof(IURPC) && x.GetInterfaces().Any(i=>i==typeof(IURPC))).FirstOrDefault();
+                        var interfaces = type.GetInterfaces();
+                        var inheritInterface = interfaces.Where(x => x != typeof(IURPC) && x.GetInterfaces().Any(i => i == typeof(IURPC))).FirstOrDefault();
                         if (inheritInterface != null)
                         {
-                            if (!_URPCServiceMap.ContainsKey(inheritInterface.FullName??""))
+                            if (!_URPCServiceMap.ContainsKey(inheritInterface.FullName ?? ""))
                             {
-                                _URPCServiceMap.Add(inheritInterface.FullName??"", type);
+                                _URPCServiceMap.Add(inheritInterface.FullName ?? "", type);
                             }
                         }
-                        
+
                     }
                 }
             }
@@ -39,7 +41,7 @@ namespace UniversalRPC.Services
         /// <returns></returns>
         public Type? GetServiceType(string? serviceName)
         {
-            if(serviceName!=null&& _URPCServiceMap.TryGetValue(serviceName,out var type))
+            if (serviceName != null && _URPCServiceMap.TryGetValue(serviceName, out var type))
             {
                 return type;
             }
@@ -54,6 +56,9 @@ namespace UniversalRPC.Services
         {
             return _URPCServiceMap.Values.ToArray();
         }
-    }
 #endif
+
+
+    }
+
 }

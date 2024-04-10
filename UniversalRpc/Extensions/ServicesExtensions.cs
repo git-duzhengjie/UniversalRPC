@@ -1,18 +1,19 @@
 ﻿using UniversalRPC.Services;
+using UniversalRPC.Serialization;
+
 #if NET6_0_OR_GREATER
 using Microsoft.Extensions.DependencyInjection;
 #endif
-using Newtonsoft.Json;
-
+using System.Text.Json;
 namespace UniversalRPC.Extensions
 {
 #if NET6_0_OR_GREATER
     public static class ServicesExtensions
     {
 
-        public static void AddURPCService(this IServiceCollection services,JsonSerializerSettings? jsonSerializerSettings=null)
+        public static void AddURPCService(this IServiceCollection services,ISerialize serialize=null)
         {
-            URPC.JsonSerializerSettings = jsonSerializerSettings;
+            URPC.Serialize=serialize;
             services.AddSingleton<URPCServiceFactory>();
             var serviceFactory=services.BuildServiceProvider().GetService<URPCServiceFactory>();
             var types = serviceFactory?.GetURPCServiceTypes();
@@ -25,9 +26,9 @@ namespace UniversalRPC.Extensions
             }
         }
 
-        public static void AddURPCClient<T>(this IServiceCollection services,string url,JsonSerializerSettings? jsonSerializerSettings =null) where T : class 
+        public static void AddURPCClient<T>(this IServiceCollection services,string url,ISerialize serialize=null) where T : class 
         {
-            URPC.JsonSerializerSettings=jsonSerializerSettings;
+            URPC.Serialize=serialize;
             var URPCClient = new URPCClient<T>(url);
             if (URPCClient.Value != null)
             {

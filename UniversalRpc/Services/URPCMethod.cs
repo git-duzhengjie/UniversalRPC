@@ -1,9 +1,10 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using UniversalRPC.Extensions;
 
@@ -24,15 +25,23 @@ namespace UniversalRPC.Services
         /// <param name="methodName">方法名</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static object SendMessageViaHttp(object[] objects, string typeName, string methodName, string url)
+        public static object SendMessage(object[] objects, string typeName, string methodName, string url)
         {
-            HttpClient httpClient = new HttpClient();
-            int version = 0;
-#if NET6_0_OR_GREATER
-version=2;
-#else
-            version = 1;
-#endif
+            HttpClient httpClient;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                httpClient = new HttpClient(new WinHttpHandler());
+            }
+            else
+            {
+                httpClient = new HttpClient();
+            }
+            int version = 2;
+            //#if NET6_0_OR_GREATER
+            //version=2;
+            //#else
+            //            version = 1;
+            //#endif
             var request = new Model.Request
             {
                 ServiceName = typeName,
@@ -42,7 +51,7 @@ version=2;
             var req = new HttpRequestMessage(HttpMethod.Post, url)
             {
                 Version = new Version(version, 0),
-                Content = new StringContent(JsonConvert.SerializeObject(request, URPC.JsonSerializerSettings), Encoding.UTF8, "application/json")
+                Content = new StringContent(URPC.Serialize.Serialize(request), Encoding.UTF8, "application/json")
             };
             var response = httpClient.SendAsync(req).Result;
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
@@ -66,18 +75,33 @@ version=2;
         /// <param name="methodName">方法名</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static void SendMessageViaHttpVoid(object[] objects, string typeName, string methodName, string url)
+        public static void SendVoidMessage(object[] objects, string typeName, string methodName, string url)
         {
-            HttpClient httpClient = new HttpClient();
+            HttpClient httpClient;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                httpClient = new HttpClient(new WinHttpHandler());
+            }
+            else
+            {
+                httpClient = new HttpClient();
+            }
+            int version = 2;
+//#if NET6_0_OR_GREATER
+//version=2;
+//#else
+//            version = 1;
+//#endif
+            var request = new Model.Request
+            {
+                ServiceName = typeName,
+                MethodName = methodName,
+                Parameters = objects,
+            };
             var req = new HttpRequestMessage(HttpMethod.Post, url)
             {
-                Version = new Version(2, 0),
-                Content = new StringContent(JsonConvert.SerializeObject(new Model.Request
-                {
-                    ServiceName = typeName,
-                    MethodName = methodName,
-                    Parameters = objects,
-                }, URPC.JsonSerializerSettings), Encoding.UTF8, "application/json")
+                Version = new Version(version, 0),
+                Content = new StringContent(URPC.Serialize.Serialize(request), Encoding.UTF8, "application/json")
             };
             var response = httpClient.SendAsync(req).Result;
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
@@ -117,7 +141,7 @@ version=2;
     {
         public static T DeserializeObject(string str)
         {
-            return JsonConvert.DeserializeObject<T>(str, URPC.JsonSerializerSettings);
+            return URPC.Serialize.Deserialize<T>(str);
         }
     }
 }

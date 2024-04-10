@@ -7,11 +7,11 @@ using Microsoft.AspNetCore.Routing;
 using UniversalRPC.Model;
 using System.IO;
 using UniversalRPC.Services;
-using Newtonsoft.Json;
 using System.Threading.Tasks;
 using UniversalRPC.Extensions;
 using System.Linq;
 using System;
+using System.Text.Json;
 
 
 namespace UniversalRPC.Extensions
@@ -36,7 +36,7 @@ namespace UniversalRPC.Extensions
         {
             var body = context.Request.Body;
             var read = new StreamReader(body);
-            var request = JsonConvert.DeserializeObject<Request>(await read.ReadToEndAsync(),URPC.JsonSerializerSettings);
+            var request = URPC.Serialize.Deserialize<Request>(await read.ReadToEndAsync());
             if (request != null)
             {
                 var serviceFactory = serviceProvider.GetService<URPCServiceFactory>();
@@ -62,7 +62,7 @@ namespace UniversalRPC.Extensions
                             context.Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
                             if (result != null&&retType!=null&&retType.Name!="VoidTaskResult")
                             {
-                                await context.Response.WriteAsync(JsonConvert.SerializeObject(result, URPC.JsonSerializerSettings));
+                                await context.Response.WriteAsync(URPC.Serialize.Serialize(result));
                             }
                         }
                         else
@@ -92,7 +92,6 @@ namespace UniversalRPC.Extensions
         {
             var prefix = string.IsNullOrEmpty(serviceName) ? "" : $"/{serviceName}";
             _ = app.MapPost($"{prefix}/URPC", async (context) => await ToExcuteURPC(context, app.Services));
-            _ = app.MapGet($"{prefix}/URPC", async (context) => await ToExcuteURPC(context, app.Services));
             return app;
         }
 
@@ -107,7 +106,6 @@ namespace UniversalRPC.Extensions
             serviceName = serviceName.Replace("/", "");
             var prefix = string.IsNullOrEmpty(serviceName) ? "" : $"/{serviceName}";
             _ = app.MapPost($"{prefix}/URPC", async (context) => await ToExcuteURPC(context, app.ServiceProvider));
-            _ = app.MapGet($"{prefix}/URPC", async (context) => await ToExcuteURPC(context, app.ServiceProvider));
             return app;
         }
 
