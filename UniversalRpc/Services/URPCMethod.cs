@@ -27,21 +27,21 @@ namespace UniversalRPC.Services
         /// <exception cref="ArgumentNullException"></exception>
         public static object SendMessage(object[] objects, string typeName, string methodName, string url)
         {
-            HttpClient httpClient;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                httpClient = new HttpClient(new WinHttpHandler());
-            }
-            else
-            {
-                httpClient = new HttpClient();
-            }
+            HttpClient httpClient = new HttpClient();
+            //if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            //{
+            //    httpClient = new HttpClient(new WinHttpHandler());
+            //}
+            //else
+            //{
+            //    httpClient = new HttpClient();
+            //}
             int version = 2;
-            //#if NET6_0_OR_GREATER
-            //version=2;
-            //#else
-            //            version = 1;
-            //#endif
+#if NET6_0_OR_GREATER
+            version=2;
+#else
+            version = 1;
+#endif
             var request = new Model.Request
             {
                 ServiceName = typeName,
@@ -51,7 +51,7 @@ namespace UniversalRPC.Services
             var req = new HttpRequestMessage(HttpMethod.Post, url)
             {
                 Version = new Version(version, 0),
-                Content = new StringContent(URPC.Serialize.Serialize(request), Encoding.UTF8, "application/json")
+                Content = new StringContent(URPC.GetSerialize().Serialize(request), Encoding.UTF8, "application/json")
             };
             var response = httpClient.SendAsync(req).Result;
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
@@ -101,7 +101,7 @@ namespace UniversalRPC.Services
             var req = new HttpRequestMessage(HttpMethod.Post, url)
             {
                 Version = new Version(version, 0),
-                Content = new StringContent(URPC.Serialize.Serialize(request), Encoding.UTF8, "application/json")
+                Content = new StringContent(URPC.GetSerialize().Serialize(request), Encoding.UTF8, "application/json")
             };
             var response = httpClient.SendAsync(req).Result;
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
@@ -141,7 +141,7 @@ namespace UniversalRPC.Services
     {
         public static T DeserializeObject(string str)
         {
-            return URPC.Serialize.Deserialize<T>(str);
+            return URPC.GetSerialize().Deserialize<T>(str);
         }
     }
 }

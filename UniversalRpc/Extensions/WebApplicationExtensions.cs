@@ -16,14 +16,61 @@ using System.Text.Json;
 
 namespace UniversalRPC.Extensions
 {
+    public class ArraySet<T>
+    {
+        private T[] array;
+
+        public ArraySet(int length)
+        {
+            array = new T[length];
+        }
+
+        public void SetValue(int index, T value)
+        {
+            array[index] = value;
+        }
+
+        public T[] GetValue()
+        {
+            return array;
+        }
+    }
 #if NET6_0_OR_GREATER
     public static class WebApplicationExtensions
     {
 
-        private static bool Same(System.Type[] objects1, object[] objects2)
+        private static bool Same(Type[] objects1, object[] objects2)
         {
             for (var i = 0; i < objects1.Length; i++)
             {
+                if (objects1[i].IsArray && objects2[i] is not System.Collections.IList)
+                {
+                    return false;
+                }
+                if (objects1[i].IsArray && objects2[i] is System.Collections.IList list)
+                {
+                    var type1 = objects1[i].GetElementType();
+                    if (list.Count > 0)
+                    {
+                        var type = typeof(ArraySet<>).MakeGenericType(type1);
+                        var instance = Activator.CreateInstance(type, list.Count);
+                        for (var j = 0; j < list.Count; j++)
+                        {
+                            try
+                            {
+                                var method = type.GetMethod("SetValue");
+                                method?.Invoke(instance, new object[] { j, Convert.ChangeType(list[j], type1) });
+                            }
+                            catch
+                            {
+                                return false;
+                            }
+                        }
+                        var method2 = type.GetMethod("GetValue");
+                        objects2[i] = method2.Invoke(instance, new object[] { });
+                    }
+                    return true;
+                }
                 if (objects1[i] != objects2[i].GetType())
                 {
                     return false;
@@ -36,7 +83,7 @@ namespace UniversalRPC.Extensions
         {
             var body = context.Request.Body;
             var read = new StreamReader(body);
-            var request = URPC.Serialize.Deserialize<Request>(await read.ReadToEndAsync());
+            var request = URPC.GetSerialize().Deserialize<Request>(await read.ReadToEndAsync());
             if (request != null)
             {
                 var serviceFactory = serviceProvider.GetService<URPCServiceFactory>();
@@ -48,9 +95,10 @@ namespace UniversalRPC.Extensions
                         var service = scope.ServiceProvider.GetService(serviceType);
                         if (request?.MethodName != null)
                         {
-                            var method = serviceType.GetMethods().FirstOrDefault(x => x.Name == request.MethodName && x.GetParameters().Length == request.Parameters.Length && Same(x.GetParameters().Select(x=>x.ParameterType).ToArray(), request.Parameters));
+                            var method = serviceType.GetMethods()
+                                .FirstOrDefault(x => x.Name == request.MethodName && x.GetParameters().Length == request.Parameters.Length && Same(x.GetParameters().Select(x => x.ParameterType).ToArray(), request.Parameters));
                             var result = method?.Invoke(service, request.Parameters);
-                            Type retType=null;
+                            Type retType = null;
                             if (result != null && result.GetType().IsTask(out retType))
                             {
                                 var task = (Task)result;
@@ -60,7 +108,7 @@ namespace UniversalRPC.Extensions
                             }
 
                             context.Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
-                            if (result != null&&retType!=null&&retType.Name!="VoidTaskResult")
+                            if (result != null && retType != null && retType.Name != "VoidTaskResult")
                             {
                                 await context.Response.WriteAsync(URPC.Serialize.Serialize(result));
                             }
