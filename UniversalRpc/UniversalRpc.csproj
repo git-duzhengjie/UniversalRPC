@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.1;net6.0;net48</TargetFrameworks>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>1.1.5</Version>
-    <Description>解决数组问题</Description>
+    <Version>1.1.7</Version>
+    <Description>解决空类型问题</Description>
   </PropertyGroup>
 
   <ItemGroup>

@@ -67,7 +67,7 @@ namespace UniversalRPC.Services
 
                 ILGenerator il = mbIm.GetILGenerator();
                 LocalBuilder localObjects = il.DeclareLocal(typeof(object[]));
-                var parameterTypes = new List<Type>();
+                var parameterTypes = new List<string>();
                 il.Emit(OpCodes.Ldc_I4, parameter.Length);
                 il.Emit(OpCodes.Newarr, typeof(object));
                 il.Emit(OpCodes.Stloc, localObjects);
@@ -79,10 +79,10 @@ namespace UniversalRPC.Services
                     Type t = array[i];
                     il.Emit(OpCodes.Box, t);
                     il.Emit(OpCodes.Stelem_Ref);
-                    parameterTypes.Add(parameter[i].ParameterType);
+                    parameterTypes.Add(parameter[i].ParameterType.Name);
                 }
                 il.Emit(OpCodes.Ldloc, localObjects);
-                il.Emit(OpCodes.Ldstr, URPC.GetSerialize().Serialize(parameterTypes));
+                il.Emit(OpCodes.Ldstr, string.Join(",", parameterTypes));
                 il.Emit(OpCodes.Ldstr, type.FullName);
                 il.Emit(OpCodes.Ldstr, m.Name);
                 il.Emit(OpCodes.Ldstr, url);

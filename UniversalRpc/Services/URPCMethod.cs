@@ -47,7 +47,7 @@ namespace UniversalRPC.Services
                 ServiceName = typeName,
                 MethodName = methodName,
                 Parameters = objects,
-                ParameterTypes = URPC.GetSerialize().Deserialize<Type[]>(parameterTypes)
+                ParameterTypeNames = parameterTypes.Split(',')
             };
             var req = new HttpRequestMessage(HttpMethod.Post, url)
             {

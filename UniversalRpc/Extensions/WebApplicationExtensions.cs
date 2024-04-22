@@ -39,7 +39,7 @@ namespace UniversalRPC.Extensions
     public static class WebApplicationExtensions
     {
 
-        private static bool Same(Type[] objects1, object[] objects2,Type[] objects3)
+        private static bool Same(Type[] objects1, object[] objects2,string[] objects3)
         {
             for (var i = 0; i < objects1.Length; i++)
             {
@@ -71,7 +71,7 @@ namespace UniversalRPC.Extensions
                     }
                     return true;
                 }
-                if (objects1[i] != objects3[i])
+                if (objects1[i].Name != objects3[i])
                 {
                     return false;
                 }
@@ -96,7 +96,7 @@ namespace UniversalRPC.Extensions
                         if (request?.MethodName != null)
                         {
                             var method = serviceType.GetMethods()
-                                .FirstOrDefault(x => x.Name == request.MethodName && x.GetParameters().Length == request.Parameters.Length && Same(x.GetParameters().Select(x => x.ParameterType).ToArray(), request.Parameters,request.ParameterTypes));
+                                .FirstOrDefault(x => x.Name == request.MethodName && x.GetParameters().Length == request.Parameters.Length && Same(x.GetParameters().Select(x => x.ParameterType).ToArray(), request.Parameters,request.ParameterTypeNames));
                             var result = method?.Invoke(service, request.Parameters);
                             Type retType = null;
                             if (result != null && result.GetType().IsTask(out retType))
