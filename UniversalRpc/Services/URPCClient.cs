@@ -67,7 +67,7 @@ namespace UniversalRPC.Services
 
                 ILGenerator il = mbIm.GetILGenerator();
                 LocalBuilder localObjects = il.DeclareLocal(typeof(object[]));
-                var parameterNames = new List<string>();
+                var parameterTypes = new List<Type>();
                 il.Emit(OpCodes.Ldc_I4, parameter.Length);
                 il.Emit(OpCodes.Newarr, typeof(object));
                 il.Emit(OpCodes.Stloc, localObjects);
@@ -79,14 +79,15 @@ namespace UniversalRPC.Services
                     Type t = array[i];
                     il.Emit(OpCodes.Box, t);
                     il.Emit(OpCodes.Stelem_Ref);
-                    parameterNames.Add(parameter[i].Name);
+                    parameterTypes.Add(parameter[i].ParameterType);
                 }
                 il.Emit(OpCodes.Ldloc, localObjects);
+                il.Emit(OpCodes.Ldstr, URPC.GetSerialize().Serialize(parameterTypes));
                 il.Emit(OpCodes.Ldstr, type.FullName);
                 il.Emit(OpCodes.Ldstr, m.Name);
                 il.Emit(OpCodes.Ldstr, url);
                 var method = typeof(URPCMethod).GetMethod(isVoid? "SendVoidMessage" : "SendMessage",
-                                          new Type[] { typeof(object[]), typeof(string), typeof(string), typeof(string) });
+                                          new Type[] { typeof(object[]), typeof(string), typeof(string), typeof(string), typeof(string) });
                 il.Emit(OpCodes.Call, method
                                       ?? throw new InvalidOperationException());
                 il.Emit(OpCodes.Ret);

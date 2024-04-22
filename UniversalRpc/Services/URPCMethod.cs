@@ -25,7 +25,7 @@ namespace UniversalRPC.Services
         /// <param name="methodName">方法名</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static object SendMessage(object[] objects, string typeName, string methodName, string url)
+        public static object SendMessage(object[] objects, string parameterTypes, string typeName, string methodName, string url)
         {
             HttpClient httpClient = new HttpClient();
             //if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -47,6 +47,7 @@ namespace UniversalRPC.Services
                 ServiceName = typeName,
                 MethodName = methodName,
                 Parameters = objects,
+                ParameterTypes = URPC.GetSerialize().Deserialize<Type[]>(parameterTypes)
             };
             var req = new HttpRequestMessage(HttpMethod.Post, url)
             {

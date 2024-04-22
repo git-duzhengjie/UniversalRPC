@@ -24,5 +24,10 @@ namespace UniversalRPC.Model
         /// 请求的参数
         /// </summary>
         public object[] Parameters { get; set; }
+
+        /// <summary>
+        /// 请求的参数类型
+        /// </summary>
+        public Type[] ParameterTypes { get; set; }
     }
 }
