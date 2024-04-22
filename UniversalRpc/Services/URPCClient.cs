@@ -79,7 +79,7 @@ namespace UniversalRPC.Services
                     Type t = array[i];
                     il.Emit(OpCodes.Box, t);
                     il.Emit(OpCodes.Stelem_Ref);
-                    parameterTypes.Add(parameter[i].ParameterType.Name);
+                    parameterTypes.Add(parameter[i].ParameterType.FullName);
                 }
                 il.Emit(OpCodes.Ldloc, localObjects);
                 il.Emit(OpCodes.Ldstr, string.Join(",", parameterTypes));

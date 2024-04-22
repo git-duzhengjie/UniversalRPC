@@ -71,7 +71,7 @@ namespace UniversalRPC.Extensions
                     }
                     return true;
                 }
-                if (objects1[i].Name != objects3[i])
+                if (objects1[i].FullName != objects3[i])
                 {
                     return false;
                 }
