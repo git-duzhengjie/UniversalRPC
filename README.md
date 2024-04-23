@@ -13,7 +13,7 @@
 - EndPoint 执行UseURPCService()扩展方法
 ### 1.4 添加RPC客户端
 #### 1.4.1 服务端添加
-- IServiceCollection 执行AddRPCClient(url)方法
+- IServiceCollection 执行AddURPCClient(url)方法
 - 注入契约即可使用
 #### 1.4.2 客户端添加
 - new URPCClient<契约>()
