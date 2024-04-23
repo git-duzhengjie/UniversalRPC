@@ -16,7 +16,6 @@
 - IServiceCollection 执行AddURPCClient(url)方法
 - 注入契约即可使用
 #### 1.4.2 客户端添加
-- new URPCClient<契约>()
-- URPCClient中的Value即当前契约
+- URPC.GetUURPC获取你定义的契约类型
 ## 2 序列化
 UniversalRPC默认使用系统自带json序列化，但你也可以指定序列化方式，传入你定义的序列化实例即可。
