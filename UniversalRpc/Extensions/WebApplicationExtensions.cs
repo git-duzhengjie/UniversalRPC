@@ -43,7 +43,7 @@ namespace UniversalRPC.Extensions
         {
             for (var i = 0; i < objects1.Length; i++)
             {
-                if (objects1[i].IsArray && objects2[i] is not System.Collections.IList)
+                if (objects1[i].FullName != objects3[i])
                 {
                     return false;
                 }
@@ -71,9 +71,17 @@ namespace UniversalRPC.Extensions
                     }
                     return true;
                 }
-                if (objects1[i].FullName != objects3[i])
+                if (objects2[i].GetType().FullName != objects1[i].FullName)
                 {
-                    return false;
+                    if (objects1[i].IsEnum)
+                    {
+                        objects2[i] = Enum.ToObject(objects1[i], objects2[i]);
+                    }
+                    else
+                    {
+                        objects2[i] = Convert.ChangeType(objects2[i], objects1[i]);
+                    }
+                    
                 }
             }
             return true;
