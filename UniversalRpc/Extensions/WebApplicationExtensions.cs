@@ -71,7 +71,7 @@ namespace UniversalRPC.Extensions
                     }
                     return true;
                 }
-                if (objects2[i].GetType().FullName != objects1[i].FullName)
+                if (objects2[i]!=null&&objects2[i].GetType().FullName != objects1[i].FullName)
                 {
                     if (objects1[i].IsEnum)
                     {
