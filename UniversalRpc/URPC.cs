@@ -8,6 +8,7 @@ namespace UniversalRPC
 {
     public class URPC
     {
+        public static string Key = "dfsuioer123120sdfs_@$%";
         public static ISerialize Serialize;
 
         private static readonly Dictionary<(Type,string),object> _URPCClientService=new Dictionary<(Type,string),object>();

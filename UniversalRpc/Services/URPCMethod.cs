@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using UniversalRPC.Extensions;
 
@@ -17,6 +19,14 @@ namespace UniversalRPC.Services
     {
         public static Dictionary<string, Dictionary<string, Type>> ReturnTypeMap = new Dictionary<string, Dictionary<string, Type>>();
 
+
+        private static string GetMd5String(string str)
+        {
+            var md5 = MD5.Create();
+            var bytes=Encoding.UTF8.GetBytes(str);
+            var result=md5.ComputeHash(bytes);
+            return BitConverter.ToString(result);
+        }
         /// <summary>
         /// 
         /// </summary>
@@ -42,12 +52,14 @@ namespace UniversalRPC.Services
 #else
             version = 1;
 #endif
+            
             var request = new Model.Request
             {
                 ServiceName = typeName,
                 MethodName = methodName,
                 Parameters = objects,
-                ParameterTypeNames = parameterTypes.Split(',')
+                ParameterTypeNames = parameterTypes.Split(','),
+                Code = $"{GetMd5String(typeName,methodName,objects)}"
             };
             var req = new HttpRequestMessage(HttpMethod.Post, url)
             {
@@ -66,6 +78,12 @@ namespace UniversalRPC.Services
             }
             var result = response.Content.ReadAsStringAsync().Result;
             return DeserializeObject(result, returnType);
+        }
+
+        private static object GetMd5String(string typeName, string methodName, object[] objects)
+        {
+            var str = $"{typeName}-{methodName}-{URPC.GetSerialize().Serialize(objects)}";
+            return GetMd5String(str);
         }
 
         /// <summary>
