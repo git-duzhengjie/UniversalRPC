@@ -80,9 +80,9 @@ namespace UniversalRPC.Services
             return DeserializeObject(result, returnType);
         }
 
-        private static object GetMd5String(string typeName, string methodName, object[] objects)
+        public static string GetMd5String(string typeName, string methodName, object[] objects)
         {
-            var str = $"{typeName}-{methodName}-{URPC.GetSerialize().Serialize(objects)}";
+            var str = $"{typeName}-{methodName}-{URPC.GetSerialize().Serialize(objects)}-{URPC.Key}";
             return GetMd5String(str);
         }
 

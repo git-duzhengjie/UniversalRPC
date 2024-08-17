@@ -94,6 +94,11 @@ namespace UniversalRPC.Extensions
             var request = URPC.GetSerialize().Deserialize<Request>(await read.ReadToEndAsync());
             if (request != null)
             {
+                bool verify=VerifyRequest(request);
+                if (!verify)
+                {
+                    throw new Exception("校验失败");
+                }
                 var serviceFactory = serviceProvider.GetService<URPCServiceFactory>();
                 var serviceType = serviceFactory.GetServiceType(request.ServiceName);
                 if (serviceType != null)
@@ -138,6 +143,13 @@ namespace UniversalRPC.Extensions
                 context.Response.StatusCode = (int)System.Net.HttpStatusCode.BadRequest;
             }
         }
+
+        private static bool VerifyRequest(Request request)
+        {
+            var code = URPCMethod.GetMd5String(request.ServiceName,request.MethodName,request.Parameters);
+            return code == request.Code;
+        }
+
         /// <summary>
         /// 
         /// </summary>
