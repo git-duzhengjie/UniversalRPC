@@ -12,6 +12,7 @@ using UniversalRPC.Extensions;
 using System.Linq;
 using System;
 using System.Text.Json;
+using Microsoft.AspNetCore.SignalR;
 
 
 namespace UniversalRPC.Extensions
@@ -39,7 +40,7 @@ namespace UniversalRPC.Extensions
     public static class WebApplicationExtensions
     {
 
-        private static bool Same(Type[] objects1, object[] objects2,string[] objects3)
+        public static bool Same(Type[] objects1, object[] objects2,string[] objects3)
         {
             for (var i = 0; i < objects1.Length; i++)
             {
@@ -158,8 +159,10 @@ namespace UniversalRPC.Extensions
         /// <returns></returns>
         public static WebApplication UseURPCService(this WebApplication app, string serviceName = "")
         {
+            serviceName = serviceName.Replace("/", "");
             var prefix = string.IsNullOrEmpty(serviceName) ? "" : $"/{serviceName}";
-            _ = app.MapPost($"{prefix}/URPC", async (context) => await ToExcuteURPC(context, app.Services));
+            app.MapPost($"{prefix}/URPC", async (context) => await ToExcuteURPC(context, app.Services));
+            app.MapHub<URPCHub>($"/URPCHub");
             return app;
         }
 
@@ -173,7 +176,8 @@ namespace UniversalRPC.Extensions
         {
             serviceName = serviceName.Replace("/", "");
             var prefix = string.IsNullOrEmpty(serviceName) ? "" : $"/{serviceName}";
-            _ = app.MapPost($"{prefix}/URPC", async (context) => await ToExcuteURPC(context, app.ServiceProvider));
+            app.MapPost($"{prefix}/URPC", async (context) => await ToExcuteURPC(context, app.ServiceProvider));
+            app.MapHub<URPCHub>($"/URPCHub");
             return app;
         }
 

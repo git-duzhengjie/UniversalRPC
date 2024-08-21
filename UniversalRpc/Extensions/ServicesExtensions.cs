@@ -24,11 +24,13 @@ namespace UniversalRPC.Extensions
                     services.AddScoped(type);
                 }
             }
+            services.AddSignalR();
         }
 
-        public static void AddURPCClient<T>(this IServiceCollection services,string url,ISerialize serialize=null) where T : class 
+        public static void AddURPCClient<T>(this IServiceCollection services,string url,ISerialize serialize=null,bool isHub=false) where T : class 
         {
             URPC.Serialize=serialize;
+            URPC.HubMap[url] = isHub;
             var URPCClient = new URPCClient<T>(url);
             if (URPCClient.Value != null)
             {

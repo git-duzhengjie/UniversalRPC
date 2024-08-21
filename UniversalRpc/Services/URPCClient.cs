@@ -24,7 +24,7 @@ namespace UniversalRPC.Services
         /// <param name="httpContextAccessor"></param>
         public URPCClient(string url)
         {
-            Value = CreateType(url.TrimEnd('/')+"/URPC");
+            Value = CreateType(url.TrimEnd('/'));
         }
         private static T CreateType(string url)
         {

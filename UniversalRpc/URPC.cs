@@ -11,6 +11,8 @@ namespace UniversalRPC
         public static string Key = "dfsuioer123120sdfs_@$%";
         public static ISerialize Serialize;
 
+        public static Dictionary<string,bool> HubMap=new Dictionary<string, bool>();
+
         private static readonly Dictionary<(Type,string),object> _URPCClientService=new Dictionary<(Type,string),object>();
 
         /// <summary>
@@ -19,8 +21,9 @@ namespace UniversalRPC
         /// <typeparam name="T"></typeparam>
         /// <param name="url"></param>
         /// <returns></returns>
-        public static T GetUURPC<T>(string url) where T : class
+        public static T GetUURPC<T>(string url,bool isHub=false) where T : class
         {
+            HubMap[url] = isHub;
             if(_URPCClientService.TryGetValue((typeof(T),url),out var obj))
             {
                 return (T)obj;
