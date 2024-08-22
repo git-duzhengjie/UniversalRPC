@@ -66,7 +66,7 @@ namespace UniversalRPC.Services
         private static async Task<object> SendMessageByHubAsync(Request request, string url)
         {
             await InitHubAsync(url);
-            var result = (string)(await _hubConnection.InvokeCoreAsync("GetResultAsync",typeof(string),new object[] {URPC.GetSerialize().Serialize(request)}));
+            var result = (string)(await _hubConnectionMap[url].InvokeCoreAsync("GetResultAsync",typeof(string),new object[] {URPC.GetSerialize().Serialize(request)}));
             Type returnType = ReturnTypeMap[request.ServiceName][request.MethodName];
             if (returnType.IsTask(out var retType) && retType == null || retType.Name == "VoidTaskResult")
             {
@@ -75,22 +75,25 @@ namespace UniversalRPC.Services
             return DeserializeObject(result, returnType);
         }
 
-        private static HubConnection _hubConnection;
+        private static Dictionary<string,HubConnection> _hubConnectionMap=new Dictionary<string, HubConnection>();
         private static async Task InitHubAsync(string url)
         {
-            if (_hubConnection == null || _hubConnection.State != HubConnectionState.Connected)
+            _hubConnectionMap.TryGetValue(url, out var hubConnection);
+            if (hubConnection == null || hubConnection.State != HubConnectionState.Disconnected)
             {
-                if (_hubConnection != null)
+                if (hubConnection != null)
                 {
-                    await _hubConnection.StopAsync();
-                    await _hubConnection.DisposeAsync();
+                    await hubConnection.StopAsync();
+                    await hubConnection.DisposeAsync();
                 }
-                var builder=new HubConnectionBuilder();
-                _hubConnection = builder
+                var builder = new HubConnectionBuilder();
+                hubConnection = builder
                     .WithUrl(url)
                     .Build();
-                await _hubConnection.StartAsync();
+                await hubConnection.StartAsync();
+                _hubConnectionMap[url] = hubConnection;
             }
+            
         }
 
         private static object SendMessageByHttp(Request request, string url)
@@ -184,7 +187,7 @@ namespace UniversalRPC.Services
         private static async Task SendVoidMessageByHubAsync(Request request, string url)
         {
             await InitHubAsync(url);
-            await _hubConnection.InvokeAsync("GetResultAsync", URPC.GetSerialize().Serialize(request));
+            await _hubConnectionMap[url].InvokeAsync("GetResultAsync", URPC.GetSerialize().Serialize(request));
         }
 
         private static object DeserializeObject(string str, Type returnType)
