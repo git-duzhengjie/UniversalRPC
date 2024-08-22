@@ -80,6 +80,11 @@ namespace UniversalRPC.Services
         {
             if (_hubConnection == null || _hubConnection.State != HubConnectionState.Connected)
             {
+                if (_hubConnection != null)
+                {
+                    await _hubConnection.StopAsync();
+                    await _hubConnection.DisposeAsync();
+                }
                 var builder=new HubConnectionBuilder();
                 _hubConnection = builder
                     .WithUrl(url)
