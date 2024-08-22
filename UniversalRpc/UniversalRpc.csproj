@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.1;net6.0;net48</TargetFrameworks>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>1.2.2</Version>
-    <Description>增加hub调用</Description>
+    <Version>1.2.3</Version>
+    <Description>解决hub释放问题</Description>
   </PropertyGroup>
 
   <ItemGroup>
