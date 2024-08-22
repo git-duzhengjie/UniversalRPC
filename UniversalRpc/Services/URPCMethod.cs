@@ -79,7 +79,7 @@ namespace UniversalRPC.Services
         private static async Task InitHubAsync(string url)
         {
             _hubConnectionMap.TryGetValue(url, out var hubConnection);
-            if (hubConnection == null || hubConnection.State != HubConnectionState.Disconnected)
+            if (hubConnection == null || hubConnection.State != HubConnectionState.Connected)
             {
                 if (hubConnection != null)
                 {
@@ -89,6 +89,7 @@ namespace UniversalRPC.Services
                 var builder = new HubConnectionBuilder();
                 hubConnection = builder
                     .WithUrl(url)
+                    .WithAutomaticReconnect()
                     .Build();
                 await hubConnection.StartAsync();
                 _hubConnectionMap[url] = hubConnection;
