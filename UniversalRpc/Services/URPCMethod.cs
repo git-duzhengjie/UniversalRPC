@@ -47,7 +47,7 @@ namespace UniversalRPC.Services
                 Parameters = objects,
                 ParameterTypeNames = parameterTypes.Split(','),
             };
-            request.Code = $"{GetMd5String(typeName, methodName, request.Parameters)}";
+            request.Code = $"{GetMd5String(typeName, methodName, request.ParameterTypeNames)}";
             if (URPC.HubMap[url])
             {
                 return SendMessageByHub(request,url+"/URPCHub");

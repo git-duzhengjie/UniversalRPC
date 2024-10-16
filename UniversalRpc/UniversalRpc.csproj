@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.1;net6.0;net48</TargetFrameworks>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>1.2.5</Version>
-    <Description>解决连接串URL问题</Description>
+    <Version>1.2.7</Version>
+    <Description>更新校验方式</Description>
   </PropertyGroup>
 
   <ItemGroup>
