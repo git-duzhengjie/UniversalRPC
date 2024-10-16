@@ -46,8 +46,8 @@ namespace UniversalRPC.Services
                 MethodName = methodName,
                 Parameters = objects,
                 ParameterTypeNames = parameterTypes.Split(','),
-                Code = $"{GetMd5String(typeName,methodName,objects)}"
             };
+            request.Code = $"{GetMd5String(typeName, methodName, request.Parameters)}";
             if (URPC.HubMap[url])
             {
                 return SendMessageByHub(request,url+"/URPCHub");
@@ -109,8 +109,9 @@ namespace UniversalRPC.Services
             var req = new HttpRequestMessage(HttpMethod.Post, url)
             {
                 Version = new Version(version, 0),
-                Content = new StringContent(URPC.GetSerialize().Serialize(request), Encoding.UTF8, "application/json")
+                Content = new StringContent(URPC.GetSerialize().Serialize(request), Encoding.UTF8, "application/json"),
             };
+            req.Headers.Add("Code",URPC.Key);
             var response = httpClient.SendAsync(req).Result;
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {

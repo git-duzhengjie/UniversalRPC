@@ -95,7 +95,7 @@ namespace UniversalRPC.Extensions
             var request = URPC.GetSerialize().Deserialize<Request>(await read.ReadToEndAsync());
             if (request != null)
             {
-                bool verify=VerifyRequest(request);
+                bool verify=VerifyRequest(request,context.Request.Headers);
                 if (!verify)
                 {
                     throw new Exception("校验失败");
@@ -145,10 +145,10 @@ namespace UniversalRPC.Extensions
             }
         }
 
-        private static bool VerifyRequest(Request request)
+        private static bool VerifyRequest(Request request, IHeaderDictionary headers)
         {
-            var code = URPCMethod.GetMd5String(request.ServiceName,request.MethodName,request.Parameters);
-            return code == request.Code;
+            var code = URPCMethod.GetMd5String(request.ServiceName,request.MethodName,request.ParameterTypeNames);
+            return code == request.Code&&headers.TryGetValue("Code",out var key)&&key==URPC.Key;
         }
 
         /// <summary>
