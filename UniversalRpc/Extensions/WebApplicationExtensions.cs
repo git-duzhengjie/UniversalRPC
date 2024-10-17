@@ -13,6 +13,8 @@ using System.Linq;
 using System;
 using System.Text.Json;
 using Microsoft.AspNetCore.SignalR;
+using Newtonsoft.Json.Linq;
+using System.Text.Json.Nodes;
 
 
 namespace UniversalRPC.Extensions
@@ -36,6 +38,21 @@ namespace UniversalRPC.Extensions
             return array;
         }
     }
+
+    class JObjectConvert<T>
+    {
+        public T GetValue1(JObject obj)
+        {
+            return obj.ToObject<T>();
+        }
+
+        public T GetValue2(JValue jValue)
+        {
+            return jValue.ToObject<T>();
+        }
+    }
+
+    
 #if NET6_0_OR_GREATER
     public static class WebApplicationExtensions
     {
@@ -60,7 +77,7 @@ namespace UniversalRPC.Extensions
                             try
                             {
                                 var method = type.GetMethod("SetValue");
-                                method?.Invoke(instance, new object[] { j, Convert.ChangeType(list[j], type1) });
+                                method?.Invoke(instance, new object[] { j, GetValue(list[j],type1) });
                             }
                             catch
                             {
@@ -70,7 +87,7 @@ namespace UniversalRPC.Extensions
                         var method2 = type.GetMethod("GetValue");
                         objects2[i] = method2.Invoke(instance, new object[] { });
                     }
-                    return true;
+                    continue;
                 }
                 if (objects2[i]!=null&&objects2[i].GetType().FullName != objects1[i].FullName)
                 {
@@ -88,11 +105,45 @@ namespace UniversalRPC.Extensions
             return true;
         }
 
+        private static object GetValue(object v, Type type1)
+        {
+            try
+            {
+                return Convert.ChangeType(v, type1);
+            }
+            catch
+            {
+                if (type1.IsAbstract)
+                {
+                    type1= GetObjectType(v);
+                }
+                var type = typeof(JObjectConvert<>).MakeGenericType(type1);
+                var instance = Activator.CreateInstance(type);
+                var method = v.GetType() == typeof(JObject) ? type.GetMethod("GetValue1") : type.GetMethod("GetValue2");
+                return method.Invoke(instance, new object[] { v });
+            }
+            
+        }
+
+        private static Type GetObjectType(object v)
+        {
+            if(v is JObject jbj)
+            {
+                return Type.GetType(jbj["$type"].ToString());
+            }
+            if(v is JValue jValue)
+            {
+                return Type.GetType(jValue["$type"].ToString());
+            }
+            return null;
+        }
+
         private async static Task ToExcuteURPC(HttpContext context, IServiceProvider serviceProvider)
         {
             var body = context.Request.Body;
             var read = new StreamReader(body);
-            var request = URPC.GetSerialize().Deserialize<Request>(await read.ReadToEndAsync());
+            var str = await read.ReadToEndAsync();
+            var request = URPC.GetSerialize().Deserialize<Request>(str);
             if (request != null)
             {
                 bool verify=VerifyRequest(request,context.Request.Headers);
