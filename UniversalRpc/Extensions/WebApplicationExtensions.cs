@@ -68,25 +68,22 @@ namespace UniversalRPC.Extensions
                 if (objects1[i].IsArray && objects2[i] is System.Collections.IList list)
                 {
                     var type1 = objects1[i].GetElementType();
-                    if (list.Count > 0)
+                    var type = typeof(ArraySet<>).MakeGenericType(type1);
+                    var instance = Activator.CreateInstance(type, list.Count);
+                    for (var j = 0; j < list.Count; j++)
                     {
-                        var type = typeof(ArraySet<>).MakeGenericType(type1);
-                        var instance = Activator.CreateInstance(type, list.Count);
-                        for (var j = 0; j < list.Count; j++)
+                        try
                         {
-                            try
-                            {
-                                var method = type.GetMethod("SetValue");
-                                method?.Invoke(instance, new object[] { j, GetValue(list[j],type1) });
-                            }
-                            catch
-                            {
-                                return false;
-                            }
+                            var method = type.GetMethod("SetValue");
+                            method?.Invoke(instance, new object[] { j, GetValue(list[j], type1) });
                         }
-                        var method2 = type.GetMethod("GetValue");
-                        objects2[i] = method2.Invoke(instance, new object[] { });
+                        catch
+                        {
+                            return false;
+                        }
                     }
+                    var method2 = type.GetMethod("GetValue");
+                    objects2[i] = method2.Invoke(instance, new object[] { });
                     continue;
                 }
                 if (objects2[i]!=null&&objects2[i].GetType().FullName != objects1[i].FullName)
@@ -103,6 +100,22 @@ namespace UniversalRPC.Extensions
                 }
             }
             return true;
+        }
+
+        class EmpytArrayConverter<T>
+        {
+            public T[] GetEmpty()
+            {
+                return Array.Empty<T>();
+            }
+        }
+
+        private static object GetEmptyArray(Type type1)
+        {
+            var type = typeof(EmpytArrayConverter<>).MakeGenericType(type1);
+            var instance=Activator.CreateInstance(type);
+            var method = type.GetMethod("GetEmpty");
+            return method.Invoke(instance, new object[] { });
         }
 
         private static object GetValue(object v, Type type1)
