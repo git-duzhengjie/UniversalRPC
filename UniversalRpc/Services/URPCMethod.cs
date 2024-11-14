@@ -60,7 +60,16 @@ namespace UniversalRPC.Services
 
         private static object SendMessageByHub(Request request, string url)
         {
-            return SendMessageByHubAsync(request,url).Result;
+            Type returnType = ReturnTypeMap[request.ServiceName][request.MethodName];
+            if(returnType.IsTask(out var retType))
+            {
+                return SendMessageByHubAsync(request, url);
+            }
+            else
+            {
+                return SendMessageByHubAsync(request, url).Result;
+            }
+            
         }
 
         private static async Task<object> SendMessageByHubAsync(Request request, string url)
@@ -70,9 +79,9 @@ namespace UniversalRPC.Services
             Type returnType = ReturnTypeMap[request.ServiceName][request.MethodName];
             if (returnType.IsTask(out var retType) && retType == null || retType.Name == "VoidTaskResult")
             {
-                return Task.CompletedTask;
+                return null;
             }
-            return DeserializeObject(result, returnType);
+            return DeserializeObject(result, retType);
         }
 
         private static Dictionary<string,HubConnection> _hubConnectionMap=new Dictionary<string, HubConnection>();
@@ -112,15 +121,32 @@ namespace UniversalRPC.Services
                 Content = new StringContent(URPC.GetSerialize().Serialize(request), Encoding.UTF8, "application/json"),
             };
             req.Headers.Add("Code",URPC.Key);
+            Type returnType = ReturnTypeMap[request.ServiceName][request.MethodName];
+            if (returnType.IsTask(out var retType))
+            {
+                return Task.Run(() =>
+                {
+                    return GetResult(httpClient, req, retType);
+                });
+            }
+            else
+            {
+                return GetResult(httpClient,req,returnType);
+            }
+            
+        }
+
+        private static object GetResult(HttpClient httpClient, HttpRequestMessage req, Type returnType)
+        {
             var response = httpClient.SendAsync(req).Result;
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
                 throw new Exception(response.ToString());
             }
-            Type returnType = ReturnTypeMap[request.ServiceName][request.MethodName];
-            if (returnType.IsTask(out var retType) && retType == null || retType.Name == "VoidTaskResult")
+
+            if (returnType == null)
             {
-                return Task.CompletedTask;
+                return null;
             }
             var result = response.Content.ReadAsStringAsync().Result;
             return DeserializeObject(result, returnType);
@@ -195,12 +221,6 @@ namespace UniversalRPC.Services
         private static object DeserializeObject(string str, Type returnType)
         {
             var retType = returnType;
-            bool isTask = false;
-            if (returnType.BaseType?.Name == "Task")
-            {
-                retType = returnType.GetGenericArguments().First();
-                isTask = true;
-            }
             var type = typeof(JsonDeserializeObject<>).MakeGenericType(retType);
             var method = type.GetMethod("DeserializeObject");
             if (method == null)
@@ -208,14 +228,7 @@ namespace UniversalRPC.Services
                 return null;
             }
             var result = method.Invoke(null, new object[] { str });
-            if (isTask)
-            {
-                return Task.FromResult(result);
-            }
-            else
-            {
-                return result;
-            }
+            return result;
         }
     }
     class JsonDeserializeObject<T>
