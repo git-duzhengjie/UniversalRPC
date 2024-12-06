@@ -37,6 +37,21 @@ namespace UniversalRPC.Extensions
                 services.AddSingleton(URPCClient.Value);
             }
         }
+
+        public static void AddURPCClients(this IServiceCollection services, string url, ISerialize serialize = null, bool isHub = false)
+        {
+            URPC.Serialize = serialize;
+            URPC.HubMap[url] = isHub;
+            var URPCClient = new URPCClients(url);
+            var rpcs = URPCClient.GetOrCreate();
+            if (rpcs != null)
+            {
+                foreach( var rpc in rpcs)
+                {
+                    services.AddSingleton(rpc);
+                }
+            }
+        }
     }
 #endif
 }
