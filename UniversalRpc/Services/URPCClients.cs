@@ -114,7 +114,7 @@ namespace UniversalRPC.Services
                 var instance = Activator.CreateInstance(typeInfo);
                 if (instance != null)
                 {
-                    return (T)instance;
+                    return instance;
                 }
             }
             return null;
