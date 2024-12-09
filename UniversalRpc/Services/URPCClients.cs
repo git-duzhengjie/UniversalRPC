@@ -36,7 +36,10 @@ namespace UniversalRPC.Services
             var assemblies= AppDomain.CurrentDomain.GetAssemblies();
             var types=new List<Type>();
             foreach (var assembly in assemblies) { 
-                var tps=assembly.GetTypes().Where(x=>typeof(IURPC).IsAssignableFrom(x));
+                var tps=assembly.GetTypes()
+                    .Where(x=>typeof(IURPC).IsAssignableFrom(x))
+                    .Where(x=>x.IsInterface)
+                    .ToArray();
                 types.AddRange(tps);
             }
             return types;
