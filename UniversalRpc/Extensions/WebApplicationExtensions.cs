@@ -229,7 +229,7 @@ namespace UniversalRPC.Extensions
                 {
                     return false;
                 }
-                if (array[2]!= URPC.GetSerialize().Serialize(request.Parameters))
+                if (array[2]!= URPC.GetSerialize().Serialize(request.ParameterTypeNames))
                 {
                     return false;
                 }

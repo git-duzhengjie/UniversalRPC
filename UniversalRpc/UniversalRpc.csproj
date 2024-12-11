@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.1;net6.0;net48</TargetFrameworks>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>1.3.3</Version>
+    <Version>1.3.4</Version>
     <Description>校验增加时间，超过10秒视为无效</Description>
   </PropertyGroup>
 
