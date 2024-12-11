@@ -47,7 +47,7 @@ namespace UniversalRPC.Services
                 Parameters = objects,
                 ParameterTypeNames = parameterTypes.Split(','),
             };
-            request.Code = $"{GetMd5String(typeName, methodName, request.ParameterTypeNames)}";
+            request.Code = $"{GetEncryptString(typeName, methodName, request.ParameterTypeNames)}";
             if (URPC.HubMap[url])
             {
                 return SendMessageByHub(request,url+"/URPCHub");
@@ -120,7 +120,6 @@ namespace UniversalRPC.Services
                 Version = new Version(version, 0),
                 Content = new StringContent(URPC.GetSerialize().Serialize(request), Encoding.UTF8, "application/json"),
             };
-            req.Headers.Add("Code",URPC.Key);
             Type returnType = ReturnTypeMap[request.ServiceName][request.MethodName];
             if (returnType.IsTask(out var retType))
             {
@@ -152,10 +151,16 @@ namespace UniversalRPC.Services
             return DeserializeObject(result, returnType);
         }
 
-        public static string GetMd5String(string typeName, string methodName, object[] objects)
+        public static string GetEncryptString(string typeName, string methodName, object[] objects)
         {
-            var str = $"{typeName}-{methodName}-{URPC.GetSerialize().Serialize(objects)}-{URPC.Key}";
-            return GetMd5String(str);
+            var str = $"{typeName}-{methodName}-{URPC.GetSerialize().Serialize(objects)}-{DateTime.UtcNow}";
+            return Crypt.Encrypt(str);
+        }
+
+        public static string GetDecryptString(string code)
+        {
+            var str = Crypt.Decrypt(code);
+            return str;
         }
 
         /// <summary>

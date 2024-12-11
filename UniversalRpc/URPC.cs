@@ -8,7 +8,9 @@ namespace UniversalRPC
 {
     public class URPC
     {
-        public static string Key = "dfsuioer123120sdfs_@$%";
+        public static string Key = "AAECAwQFBgcICQoLDA0ODw==";
+        public static string IV = "SAECAwQFBgcICQoLDA0ODw==";
+
         public static ISerialize Serialize;
 
         public static Dictionary<string,bool> HubMap=new Dictionary<string, bool>();

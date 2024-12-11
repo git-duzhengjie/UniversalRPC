@@ -15,6 +15,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json.Linq;
 using System.Text.Json.Nodes;
+using System.Xml.Linq;
 
 
 namespace UniversalRPC.Extensions
@@ -159,7 +160,7 @@ namespace UniversalRPC.Extensions
             var request = URPC.GetSerialize().Deserialize<Request>(str);
             if (request != null)
             {
-                bool verify=VerifyRequest(request,context.Request.Headers);
+                bool verify=VerifyRequest(request);
                 if (!verify)
                 {
                     throw new Exception("校验失败");
@@ -209,10 +210,41 @@ namespace UniversalRPC.Extensions
             }
         }
 
-        private static bool VerifyRequest(Request request, IHeaderDictionary headers)
+        private static bool VerifyRequest(Request request)
         {
-            var code = URPCMethod.GetMd5String(request.ServiceName,request.MethodName,request.ParameterTypeNames);
-            return code == request.Code&&headers.TryGetValue("Code",out var key)&&key==URPC.Key;
+            try
+            {
+                var str = URPCMethod.GetDecryptString(request.Code);
+                var array = str.Split("-");
+                var time = DateTime.Parse(array[3]);
+                if ((DateTime.UtcNow - time).TotalSeconds > 10)
+                {
+                    throw new ArgumentException("请求失效");
+                }
+                if (array[0] != request.ServiceName)
+                {
+                    return false;
+                }
+                if (array[1] != request.MethodName)
+                {
+                    return false;
+                }
+                if (array[2]!= URPC.GetSerialize().Serialize(request.Parameters))
+                {
+                    return false;
+                }
+                return true;
+            }
+            catch(ArgumentException)
+            {
+                throw;
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return false;
+            }
+            
         }
 
         /// <summary>
