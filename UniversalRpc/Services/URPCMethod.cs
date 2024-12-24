@@ -47,7 +47,7 @@ namespace UniversalRPC.Services
                 Parameters = objects,
                 ParameterTypeNames = parameterTypes.Split(','),
             };
-            request.Code = $"{GetEncryptString(typeName, methodName, request.ParameterTypeNames)}";
+            request.Code = $"{GetEncryptString(typeName, methodName, request.ParameterTypeNames,url)}";
             if (URPC.HubMap[url])
             {
                 return SendMessageByHub(request,url+"/URPCHub");
@@ -151,9 +151,12 @@ namespace UniversalRPC.Services
             return DeserializeObject(result, returnType);
         }
 
-        public static string GetEncryptString(string typeName, string methodName, object[] objects)
+        public static string GetEncryptString(string typeName, string methodName, object[] objects, string url)
         {
-            var str = $"{typeName}-{methodName}-{URPC.GetSerialize().Serialize(objects)}-{DateTime.UtcNow}";
+            var response= new HttpClient().SendAsync(new HttpRequestMessage(HttpMethod.Get, $"{url}/URPC/time"))
+                .Result.Content.ReadAsStringAsync().Result;
+            var utcNow = DateTime.Parse(response);
+            var str = $"{typeName}-{methodName}-{URPC.GetSerialize().Serialize(objects)}-{utcNow}";
             return Crypt.Encrypt(str);
         }
 

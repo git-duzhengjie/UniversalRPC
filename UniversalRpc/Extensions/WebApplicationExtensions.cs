@@ -8,14 +8,9 @@ using UniversalRPC.Model;
 using System.IO;
 using UniversalRPC.Services;
 using System.Threading.Tasks;
-using UniversalRPC.Extensions;
 using System.Linq;
 using System;
-using System.Text.Json;
-using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json.Linq;
-using System.Text.Json.Nodes;
-using System.Xml.Linq;
 
 
 namespace UniversalRPC.Extensions
@@ -259,7 +254,19 @@ namespace UniversalRPC.Extensions
             var prefix = string.IsNullOrEmpty(serviceName) ? "" : $"/{serviceName}";
             app.MapPost($"{prefix}/URPC", async (context) => await ToExcuteURPC(context, app.Services));
             app.MapHub<URPCHub>($"/URPCHub");
+            app.MapGet($"{prefix}/URPC/time", async context => await GetTime(context));
             return app;
+        }
+        /// <summary>
+        /// 获取时间
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        private static async Task GetTime(HttpContext context)
+        {
+            context.Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
+            await context.Response.WriteAsync(DateTime.UtcNow.ToString());
         }
 
         /// <summary>
@@ -274,6 +281,7 @@ namespace UniversalRPC.Extensions
             var prefix = string.IsNullOrEmpty(serviceName) ? "" : $"/{serviceName}";
             app.MapPost($"{prefix}/URPC", async (context) => await ToExcuteURPC(context, app.ServiceProvider));
             app.MapHub<URPCHub>($"/URPCHub");
+            app.MapGet($"{prefix}/URPC/time", async context => await GetTime(context));
             return app;
         }
 
