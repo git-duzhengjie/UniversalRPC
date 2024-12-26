@@ -15,9 +15,9 @@ namespace UniversalRPC.Services
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
             foreach (var assembly in assemblies)
             {
-                foreach (var type in assembly.GetTypes())
+                foreach (var type in assembly.GetExportedTypes())
                 {
-                    if (type.IsClass && typeof(IURPC).IsAssignableFrom(type))
+                    if (type.IsClass && typeof(IURPC).IsAssignableFrom(type)&&!type.FullName.EndsWith("Client"))
                     {
                         var interfaces = type.GetInterfaces();
                         var inheritInterface = interfaces.Where(x => x != typeof(IURPC) && x.GetInterfaces().Any(i => i == typeof(IURPC))).FirstOrDefault();

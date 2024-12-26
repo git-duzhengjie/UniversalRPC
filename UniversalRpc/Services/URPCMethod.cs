@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
@@ -10,6 +12,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using UniversalRpc.Attibutes;
 using UniversalRPC.Extensions;
 using UniversalRPC.Model;
 
@@ -22,14 +25,6 @@ namespace UniversalRPC.Services
     {
         public static Dictionary<string, Dictionary<string, Type>> ReturnTypeMap = new Dictionary<string, Dictionary<string, Type>>();
 
-
-        private static string GetMd5String(string str)
-        {
-            var md5 = MD5.Create();
-            var bytes=Encoding.UTF8.GetBytes(str);
-            var result=md5.ComputeHash(bytes);
-            return BitConverter.ToString(result);
-        }
         /// <summary>
         /// 
         /// </summary>
@@ -47,6 +42,7 @@ namespace UniversalRPC.Services
                 Parameters = objects,
                 ParameterTypeNames = parameterTypes.Split(','),
             };
+            url = GetUrl(url,typeName);
             request.Code = $"{GetEncryptString(typeName, methodName, request.ParameterTypeNames,url)}";
             if (URPC.HubMap[url])
             {
@@ -56,6 +52,26 @@ namespace UniversalRPC.Services
             {
                 return SendMessageByHttp(request,url+"/URPC");
             }
+        }
+
+        private static string GetUrl(string url, string typeName)
+        {
+            var type=Type.GetType(typeName);
+            Debug.Assert(type!=null);
+            var serviceNameAttribute = type.GetCustomAttribute<ServiceNameAttribute>();
+            string serviceName;
+            if (serviceNameAttribute != null) {
+                serviceName = serviceNameAttribute.Name;
+            }
+            else
+            {
+                serviceName = typeName.Split('.')[0];
+            }
+            if (!url.EndsWith(serviceName))
+            {
+                return url.TrimEnd('/') + "/" + serviceName;
+            }
+            return url;
         }
 
         private static object SendMessageByHub(Request request, string url)

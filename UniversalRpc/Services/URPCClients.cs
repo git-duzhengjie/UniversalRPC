@@ -9,11 +9,15 @@ using UniversalRPC.Contracts;
 
 namespace UniversalRPC.Services
 {
-    class URPCClients
+    public class URPCClients
     {
         private string url;
+        public static URPCClients Instance;
+
+        public Type[] Types;
         public URPCClients(string url) { 
             this.url = url;
+            Instance = this;
         }
         private List<IURPC> uRPCs;
         public IURPC[] GetOrCreate()
@@ -28,6 +32,7 @@ namespace UniversalRPC.Services
                 var instance= (IURPC)CreateType(url, dataType);
                 uRPCs.Add(instance);
             }
+            Types = dataTypes.ToArray();
             return uRPCs.ToArray();
         }
 
@@ -36,9 +41,10 @@ namespace UniversalRPC.Services
             var assemblies= AppDomain.CurrentDomain.GetAssemblies();
             var types=new List<Type>();
             foreach (var assembly in assemblies) { 
-                var tps=assembly.GetTypes()
+                var tps=assembly.GetExportedTypes()
                     .Where(x=>typeof(IURPC).IsAssignableFrom(x))
                     .Where(x=>x.IsInterface)
+                    .Where(x=>x!=typeof(IURPC))
                     .ToArray();
                 types.AddRange(tps);
             }
@@ -50,7 +56,7 @@ namespace UniversalRPC.Services
             TypeBuilder typeBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("UniversalRPC"),
                     AssemblyBuilderAccess.Run)
                 .DefineDynamicModule(type.GetTypeInfo().Module.Name)
-                .DefineType(type.FullName ?? throw new InvalidOperationException(), TypeAttributes.NotPublic);
+                .DefineType(GetFullName(type), TypeAttributes.NotPublic);
             typeBuilder.AddInterfaceImplementation(type);
             MethodInfo[] methods = type.GetMethods();
             lock (URPCMethod.ReturnTypeMap)
@@ -121,6 +127,15 @@ namespace UniversalRPC.Services
                 }
             }
             return null;
+        }
+
+        private static string GetFullName(Type type)
+        {
+            var fullName=type.FullName;
+            var lastName = fullName.Split('.').Last();
+            var newLastName = lastName.TrimStart('I')+"Client";
+            var newFullName= fullName.Replace(lastName,newLastName);
+            return newFullName;
         }
     }
 }

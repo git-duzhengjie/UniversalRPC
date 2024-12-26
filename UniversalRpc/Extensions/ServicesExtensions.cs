@@ -1,5 +1,9 @@
 ﻿using UniversalRPC.Services;
 using UniversalRPC.Serialization;
+using System;
+using System.Linq;
+
+
 
 #if NET6_0_OR_GREATER
 using Microsoft.Extensions.DependencyInjection;
@@ -48,7 +52,8 @@ namespace UniversalRPC.Extensions
             {
                 foreach( var rpc in rpcs)
                 {
-                    services.AddSingleton(rpc);
+                    var type = rpc.GetType().GetInterfaces().First();
+                    services.AddSingleton(type,rpc);
                 }
             }
         }
