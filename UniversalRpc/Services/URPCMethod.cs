@@ -42,21 +42,21 @@ namespace UniversalRPC.Services
                 Parameters = objects,
                 ParameterTypeNames = parameterTypes.Split(','),
             };
-            url = GetUrl(url,typeName);
-            request.Code = $"{GetEncryptString(typeName, methodName, request.ParameterTypeNames,url)}";
+            var realUrl = GetUrl(url,typeName);
+            request.Code = $"{GetEncryptString(typeName, methodName, request.ParameterTypeNames, realUrl)}";
             if (URPC.HubMap[url])
             {
-                return SendMessageByHub(request,url+"/URPCHub");
+                return SendMessageByHub(request, realUrl + "/URPCHub");
             }
             else
             {
-                return SendMessageByHttp(request,url+"/URPC");
+                return SendMessageByHttp(request, realUrl + "/URPC");
             }
         }
 
         private static string GetUrl(string url, string typeName)
         {
-            var type=Type.GetType(typeName);
+            var type=URPCClients.Instance.Types.FirstOrDefault(x=>x.FullName==typeName);
             Debug.Assert(type!=null);
             var serviceNameAttribute = type.GetCustomAttribute<ServiceNameAttribute>();
             string serviceName;

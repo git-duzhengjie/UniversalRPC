@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using System.Linq;
 using System;
 using Newtonsoft.Json.Linq;
+using System.Text.Json;
+using UniversalRPC.Serialization;
 
 
 namespace UniversalRPC.Extensions
@@ -48,7 +50,20 @@ namespace UniversalRPC.Extensions
         }
     }
 
-    
+    class JElementConvert<T>
+    {
+        public T GetValue1(JsonElement obj)
+        {
+            return obj.Deserialize<T>();
+        }
+
+        public T GetValue2(JsonDocument jValue)
+        {
+            return jValue.Deserialize<T>();
+        }
+    }
+
+
 #if NET6_0_OR_GREATER
     public static class WebApplicationExtensions
     {
@@ -84,15 +99,7 @@ namespace UniversalRPC.Extensions
                 }
                 if (objects2[i]!=null&&objects2[i].GetType().FullName != objects1[i].FullName)
                 {
-                    if (objects1[i].IsEnum)
-                    {
-                        objects2[i] = Enum.ToObject(objects1[i], objects2[i]);
-                    }
-                    else
-                    {
-                        objects2[i] = Convert.ChangeType(objects2[i], objects1[i]);
-                    }
-                    
+                    objects2[i] = GetValue(objects2[i], objects1[i]);
                 }
             }
             return true;
@@ -118,6 +125,10 @@ namespace UniversalRPC.Extensions
         {
             try
             {
+                if (type1.IsEnum)
+                {
+                    return Enum.ToObject(type1, v);
+                }
                 return Convert.ChangeType(v, type1);
             }
             catch
@@ -126,10 +137,22 @@ namespace UniversalRPC.Extensions
                 {
                     type1= GetObjectType(v);
                 }
-                var type = typeof(JObjectConvert<>).MakeGenericType(type1);
-                var instance = Activator.CreateInstance(type);
-                var method = v.GetType() == typeof(JObject) ? type.GetMethod("GetValue1") : type.GetMethod("GetValue2");
-                return method.Invoke(instance, new object[] { v });
+                var vType=v.GetType();
+                if (vType.Assembly.FullName.Contains("NewtonsoftJson"))
+                {
+                    var type = typeof(JObjectConvert<>).MakeGenericType(type1);
+                    var instance = Activator.CreateInstance(type);
+                    var method = v.GetType() == typeof(JObject) ? type.GetMethod("GetValue1") : type.GetMethod("GetValue2");
+                    return method.Invoke(instance, new object[] { v });
+                }
+                else if (vType.Assembly.FullName.Contains("Text.Json"))
+                {
+                    var type = typeof(JElementConvert<>).MakeGenericType(type1);
+                    var instance = Activator.CreateInstance(type);
+                    var method = v.GetType() == typeof(JsonElement) ? type.GetMethod("GetValue1") : type.GetMethod("GetValue2");
+                    return method.Invoke(instance, new object[] { v });
+                }
+                throw new Exception($"不支持类型{type1}");
             }
             
         }
@@ -184,7 +207,7 @@ namespace UniversalRPC.Extensions
                             context.Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
                             if (result != null && retType != null && retType.Name != "VoidTaskResult")
                             {
-                                await context.Response.WriteAsync(URPC.Serialize.Serialize(result));
+                                await context.Response.WriteAsync(URPC.GetSerialize().Serialize(result));
                             }
                         }
                         else
@@ -248,8 +271,9 @@ namespace UniversalRPC.Extensions
         /// <typeparam name="T"></typeparam>
         /// <param name="app"></param>
         /// <returns></returns>
-        public static WebApplication UseURPCService(this WebApplication app, string serviceName = "")
+        public static WebApplication UseURPCService(this WebApplication app, string serviceName = "",ISerialize serialize=null)
         {
+            URPC.Serialize=serialize;
             serviceName = serviceName.Replace("/", "");
             var prefix = string.IsNullOrEmpty(serviceName) ? "" : $"/{serviceName}";
             app.MapPost($"{prefix}/URPC", async (context) => await ToExcuteURPC(context, app.Services));
@@ -275,8 +299,9 @@ namespace UniversalRPC.Extensions
         /// <typeparam name="T"></typeparam>
         /// <param name="app"></param>
         /// <returns></returns>
-        public static IEndpointRouteBuilder UseURPCService(this IEndpointRouteBuilder app, string serviceName = "")
+        public static IEndpointRouteBuilder UseURPCService(this IEndpointRouteBuilder app, string serviceName = "", ISerialize serialize = null)
         {
+            URPC.Serialize = serialize;
             serviceName = serviceName.Replace("/", "");
             var prefix = string.IsNullOrEmpty(serviceName) ? "" : $"/{serviceName}";
             app.MapPost($"{prefix}/URPC", async (context) => await ToExcuteURPC(context, app.ServiceProvider));

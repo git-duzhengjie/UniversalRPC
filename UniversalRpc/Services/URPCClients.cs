@@ -56,7 +56,7 @@ namespace UniversalRPC.Services
             TypeBuilder typeBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("UniversalRPC"),
                     AssemblyBuilderAccess.Run)
                 .DefineDynamicModule(type.GetTypeInfo().Module.Name)
-                .DefineType(GetFullName(type), TypeAttributes.NotPublic);
+                .DefineType(type.FullName, TypeAttributes.NotPublic);
             typeBuilder.AddInterfaceImplementation(type);
             MethodInfo[] methods = type.GetMethods();
             lock (URPCMethod.ReturnTypeMap)
