@@ -15,7 +15,7 @@ namespace UniversalRPC.Extensions
                 ret = null;
                 return true;
             }
-            if( type.BaseType.Name.StartsWith("Task")){
+            if(type.BaseType!=null&&type.BaseType.Name.StartsWith("Task")){
                 ret = type.GetGenericArguments().FirstOrDefault();
                 return true;
             };

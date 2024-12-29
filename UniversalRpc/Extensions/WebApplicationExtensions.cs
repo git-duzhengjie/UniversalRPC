@@ -290,7 +290,8 @@ namespace UniversalRPC.Extensions
         private static async Task GetTime(HttpContext context)
         {
             context.Response.StatusCode = (int)System.Net.HttpStatusCode.OK;
-            await context.Response.WriteAsync(DateTime.UtcNow.ToString());
+            var str= DateTime.UtcNow.ToString();
+            await context.Response.WriteAsync(str);
         }
 
         /// <summary>
