@@ -13,6 +13,7 @@ using System;
 using Newtonsoft.Json.Linq;
 using System.Text.Json;
 using UniversalRPC.Serialization;
+using Microsoft.Extensions.Logging;
 
 
 namespace UniversalRPC.Extensions
@@ -178,7 +179,8 @@ namespace UniversalRPC.Extensions
             var request = URPC.GetSerialize().Deserialize<Request>(str);
             if (request != null)
             {
-                bool verify=VerifyRequest(request);
+                var logger = serviceProvider.GetService<ILogger>();
+                bool verify=VerifyRequest(request,logger);
                 if (!verify)
                 {
                     throw new Exception("校验失败");
@@ -228,7 +230,7 @@ namespace UniversalRPC.Extensions
             }
         }
 
-        private static bool VerifyRequest(Request request)
+        private static bool VerifyRequest(Request request, ILogger logger)
         {
             try
             {
@@ -259,7 +261,7 @@ namespace UniversalRPC.Extensions
             }
             catch(Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                logger.LogError(ex.ToString());
                 return false;
             }
             
