@@ -190,21 +190,24 @@ namespace UniversalRPC.Services
         /// <param name="methodName">方法名</param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static void SendVoidMessage(object[] objects, string typeName, string methodName, string url)
+        public static void SendVoidMessage(object[] objects, string parameterTypes,string typeName, string methodName, string url)
         {
             var request = new Model.Request
             {
                 ServiceName = typeName,
                 MethodName = methodName,
                 Parameters = objects,
+                ParameterTypeNames= parameterTypes.Split(','),
             };
+            var realUrl = GetUrl(url, typeName);
+            request.Code = $"{GetEncryptString(typeName, methodName, request.ParameterTypeNames, realUrl)}";
             if (URPC.HubMap[url])
             {
-                SendVoidMessageByHub(request,url+"/URPCHub");
+                SendVoidMessageByHub(request,realUrl+"/URPCHub");
             }
             else
             {
-                SendVoidMessageByHttp(request,url+"/URPC");
+                SendVoidMessageByHttp(request,realUrl+"/URPC");
             }
             
         }

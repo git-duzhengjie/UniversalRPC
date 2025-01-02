@@ -5,14 +5,10 @@ using System.Text;
 
 namespace UniversalRPC.Services
 {
-    public class Crypt
+    public static class Crypt
     {
 
-        public Crypt()
-        {
-        }
-
-        public static string Encrypt(string str)
+        public static string Encrypt(this string str)
         {
             try
             {
@@ -36,7 +32,7 @@ namespace UniversalRPC.Services
                 throw new Exception(ce.Message);
             }
         }
-        public static string Decrypt(string str)
+        public static string Decrypt(this string str)
         {
             try
             {

@@ -40,15 +40,20 @@ namespace UniversalRPC.Services
         {
             var assemblies= AppDomain.CurrentDomain.GetAssemblies();
             var types=new List<Type>();
-            foreach (var assembly in assemblies) { 
-                var tps=assembly.GetExportedTypes()
+            var exportTypes=new List<Type>();
+            foreach (var assembly in assemblies) {
+                var etps = assembly.GetExportedTypes();
+                var tps= etps
                     .Where(x=>typeof(IURPC).IsAssignableFrom(x))
                     .Where(x=>x.IsInterface)
                     .Where(x=>x!=typeof(IURPC))
                     .ToArray();
                 types.AddRange(tps);
+                exportTypes.AddRange(etps);
             }
-            return types;
+            return types
+                .Where(x=>!exportTypes.Where(e=>!e.IsAbstract).Any(e=>x.IsAssignableFrom(e)))
+                .ToArray();
         }
 
         public static object CreateType(string url, Type type)
