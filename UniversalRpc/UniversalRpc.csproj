@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.1;net6.0;net48</TargetFrameworks>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>1.3.5</Version>
-    <Description>校验时间从服务器获取，以及解决返回空值时报错问题</Description>
+    <Version>1.3.6</Version>
+    <Description>读取异常详情</Description>
   </PropertyGroup>
 
   <ItemGroup>
