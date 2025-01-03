@@ -156,7 +156,7 @@ namespace UniversalRPC.Services
             var response = httpClient.SendAsync(req).Result;
             if (response.StatusCode != System.Net.HttpStatusCode.OK)
             {
-                throw new Exception(response.ToString());
+                throw new Exception(response.Content.ReadAsStringAsync().Result);
             }
 
             if (returnType == null)

@@ -196,6 +196,7 @@ namespace UniversalRPC.Extensions
                         {
                             var method = serviceType.GetMethods()
                                 .FirstOrDefault(x => x.Name == request.MethodName && x.GetParameters().Length == request.Parameters.Length && Same(x.GetParameters().Select(x => x.ParameterType).ToArray(), request.Parameters,request.ParameterTypeNames));
+
                             var result = method?.Invoke(service, request.Parameters);
                             Type retType = null;
                             if (result != null && result.GetType().IsTask(out retType))
