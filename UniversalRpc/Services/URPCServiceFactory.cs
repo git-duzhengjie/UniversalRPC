@@ -9,7 +9,7 @@ namespace UniversalRPC.Services
     public class URPCServiceFactory
     {
 #if NET6_0_OR_GREATER
-        private readonly Dictionary<string, Type> _URPCServiceMap = new();
+        private readonly Dictionary<string, (Type,Type)> uRPCServiceMap = new();
         public URPCServiceFactory()
         {
             var assemblies = AppDomain.CurrentDomain.GetAssemblies();
@@ -23,9 +23,9 @@ namespace UniversalRPC.Services
                         var inheritInterface = interfaces.Where(x => x != typeof(IURPC) && x.GetInterfaces().Any(i => i == typeof(IURPC))).FirstOrDefault();
                         if (inheritInterface != null)
                         {
-                            if (!_URPCServiceMap.ContainsKey(inheritInterface.FullName ?? ""))
+                            if (!uRPCServiceMap.ContainsKey(inheritInterface.FullName ?? ""))
                             {
-                                _URPCServiceMap.Add(inheritInterface.FullName ?? "", type);
+                                uRPCServiceMap.Add(inheritInterface.FullName ?? "", (type,inheritInterface));
                             }
                         }
 
@@ -41,9 +41,9 @@ namespace UniversalRPC.Services
         /// <returns></returns>
         public Type? GetServiceType(string? serviceName)
         {
-            if (serviceName != null && _URPCServiceMap.TryGetValue(serviceName, out var type))
+            if (serviceName != null && uRPCServiceMap.TryGetValue(serviceName, out var value))
             {
-                return type;
+                return value.Item1;
             }
             return null;
         }
@@ -54,7 +54,16 @@ namespace UniversalRPC.Services
         /// <returns></returns>
         public Type[] GetURPCServiceTypes()
         {
-            return _URPCServiceMap.Values.ToArray();
+            return uRPCServiceMap.Values.Select(x=>x.Item1).ToArray();
+        }
+
+        /// <summary>
+        /// 获取所有实现了IURPC接口的接口
+        /// </summary>
+        /// <returns></returns>
+        public Type[] GetURPCServiceITypes()
+        {
+            return uRPCServiceMap.Values.Select(x=>x.Item2).ToArray();
         }
 #endif
 

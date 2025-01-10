@@ -58,15 +58,7 @@ namespace UniversalRPC.Services
         {
             var type=URPCClients.Instance.Types.FirstOrDefault(x=>x.FullName==typeName);
             Debug.Assert(type!=null);
-            var serviceNameAttribute = type.GetCustomAttribute<ServiceNameAttribute>();
-            string serviceName;
-            if (serviceNameAttribute != null) {
-                serviceName = serviceNameAttribute.Name;
-            }
-            else
-            {
-                serviceName = typeName.Split('.')[0];
-            }
+            string serviceName=type.GetServiceName();
             if (!url.EndsWith(serviceName))
             {
                 return url.TrimEnd('/') + "/" + serviceName;
