@@ -5,6 +5,7 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Version>1.3.6</Version>
     <Description>读取异常详情</Description>
+    <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
