@@ -8,13 +8,13 @@ namespace UniversalRPC.Services
     public static class Crypt
     {
 
-        public static string Encrypt(this string str)
+        public static string Encrypt(this string str, string key64 = null, string iv64 = null)
         {
             try
             {
                 byte[] byteKey = //将密钥字符串转换为字节序列
-                    Convert.FromBase64String(URPC.Key);
-                byte[] iv = Convert.FromBase64String(URPC.IV);
+                    Convert.FromBase64String(key64??URPC.Key);
+                byte[] iv = Convert.FromBase64String(iv64??URPC.IV);
                 byte[] data = //将字符串转换为字节序列
                     Encoding.Unicode.GetBytes(str);
                 //创建内存流对象
@@ -32,13 +32,13 @@ namespace UniversalRPC.Services
                 throw new Exception(ce.Message);
             }
         }
-        public static string Decrypt(this string str)
+        public static string Decrypt(this string str,string key64=null,string iv64=null)
         {
             try
             {
                 byte[] byteKey = //将密钥字符串转换为字节序列
-                    Convert.FromBase64String(URPC.Key);
-                byte[] iv = Convert.FromBase64String(URPC.IV);
+                    Convert.FromBase64String(key64??URPC.Key);
+                byte[] iv = Convert.FromBase64String(iv64??URPC.IV);
                 byte[] data = //将加密后的字符串转换为字节序列
                     Convert.FromBase64String(str);
                 MemoryStream stream =//创建内存流对象并写入数据

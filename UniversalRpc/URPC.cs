@@ -8,8 +8,8 @@ namespace UniversalRPC
 {
     public class URPC
     {
-        public static string Key = "AAECAwQFBgcICQoLDA0ODw==";
-        public static string IV = "SAECAwQFBgcICQoLDA0ODw==";
+        public static string Key = "AAECAwQFKgcICQoMDA0ODw==";
+        public static string IV = "SAECAwQFKgcICQoMDA0ODw==";
 
         public static ISerialize Serialize;
 
