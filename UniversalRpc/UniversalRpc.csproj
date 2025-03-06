@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.1;net6.0;net48</TargetFrameworks>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>1.3.7</Version>
-    <Description>读取异常详情</Description>
+    <Version>1.3.8</Version>
+    <Description>解决返回值类型错误问题</Description>
     <Platforms>AnyCPU;x64</Platforms>
   </PropertyGroup>
 
