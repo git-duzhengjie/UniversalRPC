@@ -6,6 +6,7 @@ using System.Reflection.Emit;
 using System.Reflection;
 using System.Text;
 using UniversalRPC.Contracts;
+using UniversalRPC.Extensions;
 
 namespace UniversalRPC.Services
 {
@@ -64,28 +65,11 @@ namespace UniversalRPC.Services
                 .DefineType(type.FullName, TypeAttributes.NotPublic);
             typeBuilder.AddInterfaceImplementation(type);
             MethodInfo[] methods = type.GetMethods();
-            lock (URPCMethod.ReturnTypeMap)
-            {
-                if (!URPCMethod.ReturnTypeMap.ContainsKey(type.FullName))
-                {
-                    URPCMethod.ReturnTypeMap.Add(type.FullName, new Dictionary<string, Type>());
-                }
-            }
-
             foreach (var m in methods)
             {
                 ParameterInfo[] parameter = m.GetParameters();
                 Type[] array = parameter.Select(p => p.ParameterType).ToArray();
                 bool isVoid = m.ReturnType == typeof(void);
-                lock (URPCMethod.ReturnTypeMap)
-                {
-                    if (!URPCMethod.ReturnTypeMap[type.FullName].ContainsKey(m.Name))
-                    {
-                        var returnType = m.ReturnType;
-
-                        URPCMethod.ReturnTypeMap[type.FullName].Add(m.Name, returnType);
-                    }
-                }
 
                 MethodBuilder mbIm = typeBuilder.DefineMethod(m.Name,
                     MethodAttributes.Public | MethodAttributes.HideBySig |
@@ -115,12 +99,26 @@ namespace UniversalRPC.Services
                 il.Emit(OpCodes.Ldstr, type.FullName);
                 il.Emit(OpCodes.Ldstr, m.Name);
                 il.Emit(OpCodes.Ldstr, url);
-                var method = typeof(URPCMethod).GetMethod(isVoid ? "SendVoidMessage" : "SendMessage",
-                                          new Type[] { typeof(object[]), typeof(string), typeof(string), typeof(string), typeof(string) });
-                il.Emit(OpCodes.Call, method
-                                      ?? throw new InvalidOperationException());
-                il.Emit(OpCodes.Ret);
-                typeBuilder.DefineMethodOverride(mbIm, m);
+                bool isTask = m.ReturnType.IsTask(out var retType);
+                isVoid = isVoid || (isTask && retType == null);
+                var method = typeof(URPCMethod).GetMethod(GetMethodName(isTask, isVoid));
+                if (!isVoid)
+                {
+                    if (isTask)
+                    {
+                        method= method.MakeGenericMethod(new Type[] { retType });
+                    }
+                    else
+                    {
+                        method= method.MakeGenericMethod(new Type[] { m.ReturnType });
+                    }
+                    var types = method.GetGenericArguments();
+                }
+                il.Emit(OpCodes.Call, method);
+                if (!isVoid)
+                {
+                    il.Emit(OpCodes.Ret);
+                }
             }
             var typeInfo = typeBuilder.CreateTypeInfo();
             if (typeInfo != null)
@@ -134,13 +132,30 @@ namespace UniversalRPC.Services
             return null;
         }
 
-        private static string GetFullName(Type type)
+        private static string GetMethodName(bool isTask, bool isVoid)
         {
-            var fullName=type.FullName;
-            var lastName = fullName.Split('.').Last();
-            var newLastName = lastName.TrimStart('I')+"Client";
-            var newFullName= fullName.Replace(lastName,newLastName);
-            return newFullName;
+            if (isVoid)
+            {
+                if (isTask)
+                {
+                    return "SendVoidMessageAsync";
+                }
+                else
+                {
+                    return "SendVoidMessage";
+                }
+            }
+            else
+            {
+                if (isTask)
+                {
+                    return "SendMessageAsync";
+                }
+                else
+                {
+                    return "SendMessage";
+                }
+            }
         }
     }
 }
