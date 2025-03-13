@@ -115,7 +115,7 @@ namespace UniversalRPC.Services
                     var types = method.GetGenericArguments();
                 }
                 il.Emit(OpCodes.Call, method);
-                if (!isVoid)
+                if (!isVoid||isTask)
                 {
                     il.Emit(OpCodes.Ret);
                 }
