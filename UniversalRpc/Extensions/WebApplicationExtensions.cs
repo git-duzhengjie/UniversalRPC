@@ -14,6 +14,11 @@ using Newtonsoft.Json.Linq;
 using System.Text.Json;
 using UniversalRPC.Serialization;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
+using System.Xml.Linq;
+using System.Runtime.CompilerServices;
+using UniversalRpc.Abstracts;
+using System.Text.Encodings.Web;
 
 
 namespace UniversalRPC.Extensions
@@ -68,7 +73,7 @@ namespace UniversalRPC.Extensions
 #if NET6_0_OR_GREATER
     public static class WebApplicationExtensions
     {
-
+        public static Dictionary<string, Type?> ObjectTypeMap = null;
         public static bool Same(Type[] objects1, object[] objects2,string[] objects3)
         {
             for (var i = 0; i < objects1.Length; i++)
@@ -121,7 +126,68 @@ namespace UniversalRPC.Extensions
             var method = type.GetMethod("GetEmpty");
             return method.Invoke(instance, new object[] { });
         }
+        static List<string> GetJsonElementKeys(JsonElement element,bool first=false)
+        {
+            List<string> keys = new List<string>();
+            if (element.ValueKind == JsonValueKind.Object)
+            {
+                foreach (JsonProperty property in element.EnumerateObject())
+                {
+                    keys.Add(property.Name);
+                    if (first)
+                    {
+                        break;
+                    }
+                }
+            }
+            if (element.ValueKind == JsonValueKind.Array)
+            {
+                var array = element.EnumerateArray();
+                if (array.Any())
+                {
+                    return GetJsonElementKeys(array.First());
+                }
+            }
+            return keys;
+        }
 
+        private static object? JsonElementToValue(JsonElement value, Type propertyType)
+        {
+            if (value.ValueKind == JsonValueKind.String && propertyType != typeof(string))
+            {
+                if (propertyType.IsEnum)
+                {
+                    return Enum.Parse(propertyType, value.GetString());
+                }
+                else if (propertyType == typeof(int) || propertyType == typeof(int?))
+                {
+                    return int.Parse(value.GetString());
+                }
+                else if (propertyType == typeof(float) || propertyType == typeof(float?))
+                {
+                    return float.Parse(value.GetString());
+                }
+                else if (propertyType == typeof(double) || propertyType == typeof(double?))
+                {
+                    return double.Parse(value.GetString());
+                }
+            }
+            if (propertyType == typeof(string))
+            {
+                return value.GetString();
+            }
+            var keys = GetJsonElementKeys(value,true);
+            if (keys.Count > 0 && char.IsLower(keys[0][0]))
+            {
+                return value.Deserialize(propertyType,new JsonSerializerOptions
+                {
+                    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase
+                });
+            }
+            return value.Deserialize(propertyType);
+            
+        }
         private static object GetValue(object v, Type type1)
         {
             try
@@ -129,6 +195,10 @@ namespace UniversalRPC.Extensions
                 if (type1.IsEnum)
                 {
                     return Enum.ToObject(type1, v);
+                }
+                if (type1.IsAssignableFrom(v.GetType()))
+                {
+                    return v;
                 }
                 return Convert.ChangeType(v, type1);
             }
@@ -146,18 +216,15 @@ namespace UniversalRPC.Extensions
                     var method = v.GetType() == typeof(JObject) ? type.GetMethod("GetValue1") : type.GetMethod("GetValue2");
                     return method.Invoke(instance, new object[] { v });
                 }
-                else if (vType.Assembly.FullName.Contains("Text.Json"))
+                else if (v is JsonElement je)
                 {
-                    var type = typeof(JElementConvert<>).MakeGenericType(type1);
-                    var instance = Activator.CreateInstance(type);
-                    var method = v.GetType() == typeof(JsonElement) ? type.GetMethod("GetValue1") : type.GetMethod("GetValue2");
-                    return method.Invoke(instance, new object[] { v });
+                    var r= JsonElementToValue(je, type1);
+                    return r;
                 }
                 throw new Exception($"不支持类型{type1}");
             }
             
         }
-
         private static Type GetObjectType(object v)
         {
             if(v is JObject jbj)
@@ -167,6 +234,15 @@ namespace UniversalRPC.Extensions
             if(v is JValue jValue)
             {
                 return Type.GetType(jValue["$type"].ToString());
+            }
+            if(v is JsonElement je)
+            {
+                if(!je.TryGetProperty("ObjectName",out var value))
+                {
+                    je.TryGetProperty("objectName",out value);
+                }
+                var objectName = value.ToString();
+                return ObjectTypeMap[objectName];
             }
             return null;
         }
@@ -282,6 +358,7 @@ namespace UniversalRPC.Extensions
             app.MapPost($"{prefix}/URPC", async (context) => await ToExcuteURPC(context, app.Services));
             app.MapHub<URPCHub>($"/URPCHub");
             app.MapGet($"{prefix}/URPC/time", async context => await GetTime(context));
+            GenerateTypeMap();
             return app;
         }
         /// <summary>
@@ -311,7 +388,66 @@ namespace UniversalRPC.Extensions
             app.MapPost($"{prefix}/URPC", async (context) => await ToExcuteURPC(context, app.ServiceProvider));
             app.MapHub<URPCHub>($"/URPCHub");
             app.MapGet($"{prefix}/URPC/time", async context => await GetTime(context));
+            GenerateTypeMap();
             return app;
+        }
+        private static bool IsNotAbstractClass(this Type type, bool publicOnly)
+        {
+            if (type.IsSpecialName)
+                return false;
+
+            if (type.IsClass && !type.IsAbstract)
+            {
+                if (type.IsDefined(typeof(CompilerGeneratedAttribute),true))
+                    return false;
+
+                if (publicOnly)
+                    return type.IsPublic || type.IsNestedPublic;
+
+                return true;
+            }
+            return false;
+        }
+        public static void GenerateTypeMap()
+        {
+            if (ObjectTypeMap == null)
+            {
+                ObjectTypeMap = new Dictionary<string, Type?>();
+                var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+                foreach (var assembly in assemblies)
+                {
+                    var types = assembly.GetExportedTypes()
+                        .Where(x => x.IsNotAbstractClass(true))
+                        .ToArray();
+                    foreach (var type in types)
+                    {
+                        var interfaces = type.GetInterfaces();
+                        if (interfaces.Contains(typeof(IObject)))
+                        {
+                            IObject instance;
+                            if (type.IsGenericType)
+                            {
+                                var newType = type.MakeGenericType(typeof(int));
+                                instance = Activator.CreateInstance(newType) as IObject;
+                            }
+                            else
+                            {
+                                instance = Activator.CreateInstance(type) as IObject;
+                            }
+
+                            if (!ObjectTypeMap.ContainsKey(instance.ObjectName))
+                            {
+                                ObjectTypeMap.Add(instance.ObjectName, type);
+                            }
+                            else
+                            {
+                                throw new Exception($"{instance.ObjectName}该对象名已经存在");
+                            }
+                        }
+                    }
+                }
+
+            }
         }
 
     }

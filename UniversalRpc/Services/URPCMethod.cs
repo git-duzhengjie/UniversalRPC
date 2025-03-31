@@ -84,7 +84,7 @@ namespace UniversalRPC.Services
 
         private static string GetUrl(string url, string typeName)
         {
-            var type=URPCClients.Instance.Types.FirstOrDefault(x=>x.FullName==typeName);
+            var type=URPCClients.Types.FirstOrDefault(x=>x.FullName==typeName);
             Debug.Assert(type!=null);
             string serviceName=type.GetServiceName();
             if (!url.EndsWith(serviceName))

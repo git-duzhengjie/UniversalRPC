@@ -15,7 +15,7 @@ namespace UniversalRPC.Services
         private string url;
         public static URPCClients Instance;
 
-        public Type[] Types;
+        public static List<Type> Types=new List<Type>();
         public URPCClients(string url) { 
             this.url = url;
             Instance = this;
@@ -33,7 +33,7 @@ namespace UniversalRPC.Services
                 var instance= (IURPC)CreateType(url, dataType);
                 uRPCs.Add(instance);
             }
-            Types = dataTypes.ToArray();
+            Types = dataTypes.ToList();
             return uRPCs.ToArray();
         }
 

@@ -25,6 +25,7 @@ namespace UniversalRPC.Services
         public URPCClient(string url)
         {
             Value =(T)URPCClients.CreateType(url.TrimEnd('/'),typeof(T));
+            URPCClients.Types.Add(typeof(T));
         }
         
     }
