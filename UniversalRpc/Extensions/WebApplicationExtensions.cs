@@ -17,7 +17,6 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Xml.Linq;
 using System.Runtime.CompilerServices;
-using UniversalRpc.Abstracts;
 using System.Text.Encodings.Web;
 
 
@@ -73,7 +72,7 @@ namespace UniversalRPC.Extensions
 #if NET6_0_OR_GREATER
     public static class WebApplicationExtensions
     {
-        public static Dictionary<string, Type?> ObjectTypeMap = null;
+        
         public static bool Same(Type[] objects1, object[] objects2,string[] objects3)
         {
             for (var i = 0; i < objects1.Length; i++)
@@ -235,15 +234,6 @@ namespace UniversalRPC.Extensions
             {
                 return Type.GetType(jValue["$type"].ToString());
             }
-            if(v is JsonElement je)
-            {
-                if(!je.TryGetProperty("ObjectName",out var value))
-                {
-                    je.TryGetProperty("objectName",out value);
-                }
-                var objectName = value.ToString();
-                return ObjectTypeMap[objectName];
-            }
             return null;
         }
 
@@ -358,7 +348,6 @@ namespace UniversalRPC.Extensions
             app.MapPost($"{prefix}/URPC", async (context) => await ToExcuteURPC(context, app.Services));
             app.MapHub<URPCHub>($"/URPCHub");
             app.MapGet($"{prefix}/URPC/time", async context => await GetTime(context));
-            GenerateTypeMap();
             return app;
         }
         /// <summary>
@@ -388,7 +377,6 @@ namespace UniversalRPC.Extensions
             app.MapPost($"{prefix}/URPC", async (context) => await ToExcuteURPC(context, app.ServiceProvider));
             app.MapHub<URPCHub>($"/URPCHub");
             app.MapGet($"{prefix}/URPC/time", async context => await GetTime(context));
-            GenerateTypeMap();
             return app;
         }
         private static bool IsNotAbstractClass(this Type type, bool publicOnly)
@@ -408,47 +396,7 @@ namespace UniversalRPC.Extensions
             }
             return false;
         }
-        public static void GenerateTypeMap()
-        {
-            if (ObjectTypeMap == null)
-            {
-                ObjectTypeMap = new Dictionary<string, Type?>();
-                var assemblies = AppDomain.CurrentDomain.GetAssemblies();
-                foreach (var assembly in assemblies)
-                {
-                    var types = assembly.GetExportedTypes()
-                        .Where(x => x.IsNotAbstractClass(true))
-                        .ToArray();
-                    foreach (var type in types)
-                    {
-                        var interfaces = type.GetInterfaces();
-                        if (interfaces.Contains(typeof(IObject)))
-                        {
-                            IObject instance;
-                            if (type.IsGenericType)
-                            {
-                                var newType = type.MakeGenericType(typeof(int));
-                                instance = Activator.CreateInstance(newType) as IObject;
-                            }
-                            else
-                            {
-                                instance = Activator.CreateInstance(type) as IObject;
-                            }
-
-                            if (!ObjectTypeMap.ContainsKey(instance.ObjectName))
-                            {
-                                ObjectTypeMap.Add(instance.ObjectName, type);
-                            }
-                            else
-                            {
-                                throw new Exception($"{instance.ObjectName}该对象名已经存在");
-                            }
-                        }
-                    }
-                }
-
-            }
-        }
+        
 
     }
 #endif
