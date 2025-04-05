@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR.Client;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -82,9 +83,9 @@ namespace UniversalRPC.Services
             }
         }
 
-        private static string GetUrl(string url, string typeName)
+        public static string GetUrl(string url, string typeName)
         {
-            var type=URPCClients.Types.FirstOrDefault(x=>x.FullName==typeName);
+            var type=URPCClients.Instance.Types.FirstOrDefault(x=>x.FullName==typeName);
             Debug.Assert(type!=null);
             string serviceName=type.GetServiceName();
             if (!url.EndsWith(serviceName))
@@ -188,10 +189,15 @@ namespace UniversalRPC.Services
 
         public static string GetEncryptString(string typeName, string methodName, object[] objects, string url)
         {
-            var response= new HttpClient().SendAsync(new HttpRequestMessage(HttpMethod.Get, $"{url}/URPC/time"))
+            if(!URPCClients.Instance.TimeSpanMap.TryGetValue(typeName,out var timeSpan))
+            {
+                var response = new HttpClient().SendAsync(new HttpRequestMessage(HttpMethod.Get, $"{url}/URPC/time"))
                 .Result.Content.ReadAsStringAsync().Result;
-            var utcNow = DateTime.Parse(response);
-            var str = $"{typeName}-{methodName}-{URPC.GetSerialize().Serialize(objects)}-{utcNow}";
+                var utcNow = DateTime.Parse(response);
+                timeSpan = DateTime.Now - utcNow;
+                URPCClients.Instance.TimeSpanMap.Add(typeName, timeSpan);
+            }
+            var str = $"{typeName}-{methodName}-{URPC.GetSerialize().Serialize(objects)}-{DateTime.Now + timeSpan}";
             return Crypt.Encrypt(str);
         }
 

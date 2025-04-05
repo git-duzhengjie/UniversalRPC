@@ -7,6 +7,8 @@ using System.Reflection;
 using System.Text;
 using UniversalRPC.Contracts;
 using UniversalRPC.Extensions;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace UniversalRPC.Services
 {
@@ -15,7 +17,8 @@ namespace UniversalRPC.Services
         private string url;
         public static URPCClients Instance;
 
-        public static List<Type> Types=new List<Type>();
+        public List<Type> Types=new List<Type>();
+        public Dictionary<string,TimeSpan> TimeSpanMap = new Dictionary<string,TimeSpan>();
         public URPCClients(string url) { 
             this.url = url;
             Instance = this;
@@ -29,11 +32,11 @@ namespace UniversalRPC.Services
             }
             uRPCs = new List<IURPC>();
             var dataTypes = GetIURPCTypes();
+            Types = dataTypes.ToList();
             foreach (var dataType in dataTypes) {
                 var instance= (IURPC)CreateType(url, dataType);
                 uRPCs.Add(instance);
             }
-            Types = dataTypes.ToList();
             return uRPCs.ToArray();
         }
 
@@ -57,7 +60,7 @@ namespace UniversalRPC.Services
                 .ToArray();
         }
 
-        public static object CreateType(string url, Type type)
+        public object CreateType(string url, Type type)
         {
             TypeBuilder typeBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("UniversalRPC"),
                     AssemblyBuilderAccess.Run)

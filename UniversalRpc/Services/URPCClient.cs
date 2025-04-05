@@ -24,8 +24,7 @@ namespace UniversalRPC.Services
         /// <param name="httpContextAccessor"></param>
         public URPCClient(string url)
         {
-            Value =(T)URPCClients.CreateType(url.TrimEnd('/'),typeof(T));
-            URPCClients.Types.Add(typeof(T));
+            Value=new URPCClients(url).GetOrCreate().OfType<T>().FirstOrDefault();
         }
         
     }
