@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using UniversalRpc.Extensions;
 using UniversalRPC.Contracts;
 
 namespace UniversalRPC.Services
@@ -12,7 +13,7 @@ namespace UniversalRPC.Services
         private readonly Dictionary<string, (Type,Type)> uRPCServiceMap = new();
         public URPCServiceFactory()
         {
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies().Where(x => x.IsNotOut());
             foreach (var assembly in assemblies)
             {
                 foreach (var type in assembly.GetExportedTypes())

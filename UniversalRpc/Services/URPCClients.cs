@@ -9,6 +9,7 @@ using UniversalRPC.Contracts;
 using UniversalRPC.Extensions;
 using System.Net.Http;
 using System.Threading.Tasks;
+using UniversalRpc.Extensions;
 
 namespace UniversalRPC.Services
 {
@@ -40,27 +41,36 @@ namespace UniversalRPC.Services
             return uRPCs.ToArray();
         }
 
-        private IEnumerable<Type> GetIURPCTypes()
+        private static IEnumerable<Type> GetIURPCTypes()
         {
-            var assemblies= AppDomain.CurrentDomain.GetAssemblies();
+            var assemblies= AppDomain.CurrentDomain.GetAssemblies()
+                 .Where(x => x.IsNotOut())
+                 .ToArray();
             var types=new List<Type>();
             var exportTypes=new List<Type>();
             foreach (var assembly in assemblies) {
-                var etps = assembly.GetExportedTypes();
-                var tps= etps
-                    .Where(x=>typeof(IURPC).IsAssignableFrom(x))
-                    .Where(x=>x.IsInterface)
-                    .Where(x=>x!=typeof(IURPC))
-                    .ToArray();
-                types.AddRange(tps);
-                exportTypes.AddRange(etps);
+                try
+                {
+                    var etps = assembly.GetExportedTypes();
+                    var tps = etps
+                        .Where(x => typeof(IURPC).IsAssignableFrom(x))
+                        .Where(x => x.IsInterface)
+                        .Where(x => x != typeof(IURPC))
+                        .ToArray();
+                    types.AddRange(tps);
+                    exportTypes.AddRange(etps);
+                }
+                catch
+                {
+                    continue;
+                }
             }
             return types
                 .Where(x=>!exportTypes.Where(e=>!e.IsAbstract).Any(e=>x.IsAssignableFrom(e)))
                 .ToArray();
         }
 
-        public object CreateType(string url, Type type)
+        public static object CreateType(string url, Type type)
         {
             TypeBuilder typeBuilder = AssemblyBuilder.DefineDynamicAssembly(new AssemblyName("UniversalRPC"),
                     AssemblyBuilderAccess.Run)
