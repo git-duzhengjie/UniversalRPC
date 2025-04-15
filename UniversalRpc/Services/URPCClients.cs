@@ -129,10 +129,7 @@ namespace UniversalRPC.Services
                     var types = method.GetGenericArguments();
                 }
                 il.Emit(OpCodes.Call, method);
-                if (!isVoid||isTask)
-                {
-                    il.Emit(OpCodes.Ret);
-                }
+                il.Emit(OpCodes.Ret);
             }
             var typeInfo = typeBuilder.CreateTypeInfo();
             if (typeInfo != null)
