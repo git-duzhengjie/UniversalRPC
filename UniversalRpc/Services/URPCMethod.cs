@@ -195,7 +195,7 @@ namespace UniversalRPC.Services
                 .Result.Content.ReadAsStringAsync().Result;
                 var utcNow = DateTime.Parse(response);
                 timeSpan = DateTime.Now - utcNow;
-                URPCClients.Instance.TimeSpanMap.Add(typeName, timeSpan);
+                URPCClients.Instance.TimeSpanMap.TryAdd(typeName, timeSpan);
             }
             var str = $"{typeName}-{methodName}-{URPC.GetSerialize().Serialize(objects)}-{DateTime.Now + timeSpan}";
             return Crypt.Encrypt(str);

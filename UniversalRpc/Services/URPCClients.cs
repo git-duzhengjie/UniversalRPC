@@ -10,6 +10,7 @@ using UniversalRPC.Extensions;
 using System.Net.Http;
 using System.Threading.Tasks;
 using UniversalRpc.Extensions;
+using System.Collections.Concurrent;
 
 namespace UniversalRPC.Services
 {
@@ -19,7 +20,7 @@ namespace UniversalRPC.Services
         public static URPCClients Instance;
 
         public List<Type> Types=new List<Type>();
-        public Dictionary<string,TimeSpan> TimeSpanMap = new Dictionary<string,TimeSpan>();
+        public ConcurrentDictionary<string,TimeSpan> TimeSpanMap = new ConcurrentDictionary<string, TimeSpan>();
         public URPCClients(string url) { 
             this.url = url;
             Instance = this;
