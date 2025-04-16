@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Sockets;
 using System.Reflection.Emit;
 using System.Reflection;
-using System.Text;
 using UniversalRPC.Contracts;
 using UniversalRPC.Extensions;
-using System.Net.Http;
-using System.Threading.Tasks;
 using UniversalRpc.Extensions;
 using System.Collections.Concurrent;
 
@@ -16,7 +12,7 @@ namespace UniversalRPC.Services
 {
     public class URPCClients
     {
-        private string url;
+        private readonly string url;
         public static URPCClients Instance;
 
         public List<Type> Types=new List<Type>();
